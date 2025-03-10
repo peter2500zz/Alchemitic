@@ -4,23 +4,24 @@ from matters import Aspects
 
 
 class Item(ABC):
-    name = 'unknown' # 物品名词
-    desc = 'unknown' # 物品描述
-    craft_cost = Aspects() # 制作花费
-    aspect_provide = Aspects() # 分解返还
+    name = 'unknown'  # 物品名词
+    desc = 'unknown'  # 物品描述
+    craft_cost = Aspects()  # 制作花费
+    aspect_provide = Aspects()  # 分解返还
 
     _instance = None
+
     def __new__(cls, *args, **kwargs):
         if not cls._instance:
             cls._instance = super().__new__(cls, *args, **kwargs)
         return cls._instance
 
-    @abstractmethod
-    def can_be_crafted(self, aspects: Aspects):
+    def can_be_crafted(self, aspects: Aspects) -> bool:
         """
         用于判断是否可以制作该物品，与制作花费是分离的，更倾向于表示制作此物品需要达到的条件而非花费
         """
-        pass
+        return False
+
 
 class FlamePoison(Item):
     name = 'Flame poison'
@@ -28,11 +29,12 @@ class FlamePoison(Item):
     craft_cost = Aspects(Ignis=1)
     aspect_provide = Aspects(Ignis=0.3)
 
-    def can_be_crafted(self, aspects: Aspects):
+    def can_be_crafted(self, aspects: Aspects) -> bool:
         craft_condition = aspects >= Aspects(Ignis=1) and aspects < Aspects(Aqua=1)
         if craft_condition:
             return True
         return False
+
 
 class SpeedPoison(Item):
     name = 'Speed poison'
@@ -40,11 +42,22 @@ class SpeedPoison(Item):
     craft_cost = Aspects(Aer=0.7)
     aspect_provide = Aspects(Aer=0.1)
 
-    def can_be_crafted(self, aspects: Aspects):
+    def can_be_crafted(self, aspects: Aspects) -> bool:
         craft_condition = aspects >= Aspects(Aer=1)
         if craft_condition:
             return True
         return False
+
+
+class FlameFlower(Item):
+    name = 'Flame flower'
+    desc = 'A burning flower.'
+    aspect_provide = Aspects(Ignis=0.5)
+
+class Rinkangu(Item):
+    name = 'Rinkangu'
+    desc = 'Rinkangurigurigurikuacya...'
+    aspect_provide = Aspects(Ignis=1, Aqua=1, Aer=1, Terra=1)
 
 def craft(aspects: Aspects, target: Item):
     if target.can_be_crafted(aspects):
@@ -55,10 +68,8 @@ def craft(aspects: Aspects, target: Item):
         print(f'Can not craft {target.name}')
     return aspects
 
-valid_recipe = [
-    FlamePoison(),
-    SpeedPoison(),
-]
+
+valid_item = [item() for item in Item.__subclasses__()]
 
 inventory = {
 
@@ -68,7 +79,7 @@ if __name__ == '__main__':
     test_asp = Aspects(Ignis=1.5, Aer=1, Aqua=0.2)
     print(f'You have {test_asp}')
 
-    for recipe in valid_recipe:
+    for recipe in valid_item:
         if recipe.can_be_crafted(test_asp):
             print(f'You can craft {recipe.name}')
 
@@ -81,6 +92,3 @@ if __name__ == '__main__':
     test_asp = craft(test_asp, SpeedPoison())
     print(f'You have {test_asp}')
     print(f'Your inventory is {inventory}')
-
-
-
