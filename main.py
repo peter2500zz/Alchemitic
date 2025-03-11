@@ -1,101 +1,91 @@
-import tkinter as tk
-from tkinter import ttk
+import pygame
 
-# 创建主窗口
-root = tk.Tk()
-root.title("Tkinter 示例程序")
-root.geometry("800x450")      # 设置窗口大小
-root.resizable(False, False)  # 锁定窗口大小不可调整
 
-# 创建样式对象
-style = ttk.Style()
-style.theme_use("clam")       # 使用clam主题（支持现代外观）
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+RED = (255, 0, 0)
+GREEN = (0, 255, 0)
+BLUE = (0, 0, 255)
+YELLOW = (255, 255, 0)
+MAGENTA = (255, 0, 255)
+CYAN = (0, 255, 255)
 
-# ================== 创建页面容器 ==================
-# 主页面框架
-main_frame = ttk.Frame(root)
-main_frame.pack(fill="both", expand=True)  # 填充整个窗口
 
-# 设置页面框架
-settings_frame = ttk.Frame(root)
+class DragObject:
+    def __init__(self, *, x, y, width, height, image=None, color=(0, 0, 0)):
+        self.rect = pygame.Rect(x, y, width, height)  # 不太好翻译反正是自己的rect
+        self.image = image  # 显示的图像
+        self.color = color  # 没有图像时显示的色块
+        self.visible = True  # 是否渲染
+        self.active = True  # 是否更新逻辑
 
-# ================== 主页面元素 ==================
-# 标题标签
-title_label = ttk.Label(main_frame,
-                       text="主页面",
-                       font=("微软雅黑", 24))
-title_label.grid(row=0, column=0, columnspan=2, pady=20)
+        self._holding = False
 
-# 输入框
-entry_label = ttk.Label(main_frame, text="输入姓名:")
-entry_label.grid(row=1, column=0, padx=10, pady=5, sticky="e")
-name_entry = ttk.Entry(main_frame)
-name_entry.grid(row=1, column=1, padx=10, pady=5, sticky="w")
 
-# 单选按钮
-radio_var = tk.StringVar(value="option1")  # 设置默认选项
-radio1 = ttk.Radiobutton(main_frame,
-                        text="选项1",
-                        variable=radio_var,
-                        value="option1")
-radio2 = ttk.Radiobutton(main_frame,
-                        text="选项2",
-                        variable=radio_var,
-                        value="option2")
-radio1.grid(row=2, column=0, columnspan=2, pady=5, sticky="w")
-radio2.grid(row=3, column=0, columnspan=2, pady=5, sticky="w")
+    def update(self, event: pygame.event.Event):
+        if not self.active: return
 
-# 复选框
-check_var = tk.IntVar()
-check_button = ttk.Checkbutton(main_frame,
-                             text="同意条款",
-                             variable=check_var)
-check_button.grid(row=4, column=0, columnspan=2, pady=10, sticky="w")
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            self._holding = self._mouse_on_me() and pygame.mouse.get_pressed()[0]
+        elif event.type == pygame.MOUSEBUTTONUP:
+            self._holding = False
 
-# 下拉列表
-combo_label = ttk.Label(main_frame, text="选择国家:")
-combo_label.grid(row=5, column=0, padx=10, pady=5, sticky="e")
-country_combo = ttk.Combobox(main_frame,
-                            values=["中国", "美国", "日本", "德国"])
-country_combo.grid(row=5, column=1, padx=10, pady=5, sticky="w")
+        if self._holding:
+            self.rect.center = pygame.mouse.get_pos()
 
-# 按钮
-def show_settings():
-    main_frame.pack_forget()        # 隐藏主页面
-    settings_frame.pack(fill="both", expand=True)  # 显示设置页面
 
-settings_btn = ttk.Button(main_frame,
-                         text="进入设置",
-                         command=show_settings)
-settings_btn.grid(row=6, column=0, columnspan=2, pady=20)
+    def _mouse_on_me(self):
+        _mouse_pos = pygame.mouse.get_pos()
+        if self.rect.collidepoint(_mouse_pos):
+            return True
+        return False
 
-# ================== 设置页面元素 ==================
-# 返回主页面按钮
-def show_main():
-    settings_frame.pack_forget()    # 隐藏设置页面
-    main_frame.pack(fill="both", expand=True)  # 显示主页面
+    def draw(self):
+        if image := self.image:
+            screen.blit(image, self.rect)
+        else:
+            pygame.draw.rect(screen, self.color, self.rect)
 
-back_btn = ttk.Button(settings_frame,
-                     text="返回主页面",
-                     command=show_main)
-back_btn.pack(pady=20)
+# 初始化 Pygame
+pygame.init()
 
-# 滑动条
-scale_label = ttk.Label(settings_frame, text="音量调节:")
-scale_label.pack(pady=5)
-volume_scale = ttk.Scale(settings_frame,
-                        from_=0,
-                        to=100,
-                        orient="horizontal")
-volume_scale.pack(pady=5, fill="x", padx=50)
+# 创建固定大小的窗口（不可调整）
+screen = pygame.display.set_mode((800, 450), flags=0)
+pygame.display.set_caption("基础窗口")
 
-# 列表框
-listbox_label = ttk.Label(settings_frame, text="选择语言:")
-listbox_label.pack(pady=5)
-lang_listbox = tk.Listbox(settings_frame)
-for lang in ["中文", "English", "Español", "Français"]:
-    lang_listbox.insert("end", lang)
-lang_listbox.pack(pady=5, fill="both", expand=True, padx=50)
+# 创建时钟对象控制帧率
+clock = pygame.time.Clock()
 
-# ================== 启动程序 ==================
-root.mainloop()
+font = pygame.font.Font(None, 36)
+
+
+solt = DragObject(x=10, y=10, width=64, height=64)
+objects = [solt]
+
+# 主循环
+running = True
+while running:
+    # 处理事件
+    for event in pygame.event.get():
+        solt.update(event)
+
+        if event.type == pygame.QUIT:
+            running = False
+
+
+
+    # 填充背景色
+    screen.fill(WHITE)
+
+
+    mouse_pos = pygame.mouse.get_pos()
+    solt.draw()
+
+    # 更新显示
+    pygame.display.flip()
+
+    # 控制帧率为 60 FPS
+    clock.tick(60)
+
+# 退出 Pygame
+pygame.quit()
