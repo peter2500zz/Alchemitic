@@ -172,6 +172,8 @@ class Aspects:
             return False
         return True
 
+
+
 if __name__ == '__main__':
     test_asp = Aspects(Ignis=0.5, Terra=1, Aqua=1)
     test_asp2 = Aspects(Ignis=0.5)

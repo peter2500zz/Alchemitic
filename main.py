@@ -1,7 +1,12 @@
 from matters import *
+from recipe import *
+from test import *
 
-a = FlameFlower()
-pot = Pot()
-pot.add(a)
-pot.add(a)
-print(pot.done())
+
+if __name__ == '__main__':
+    pot = Pot()
+    pot.check()
+    pot.add(FlameFlower())
+    pot.add(FlameFlower())
+    pot.check()
+    pot.check_craftable()
