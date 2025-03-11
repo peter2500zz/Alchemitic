@@ -1,5 +1,5 @@
 import pygame
-
+from recipe import valid_item, Item
 
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -29,9 +29,45 @@ class DragObject:
             self._holding = self._mouse_on_me() and pygame.mouse.get_pressed()[0]
         elif event.type == pygame.MOUSEBUTTONUP:
             self._holding = False
+            update_queue.remove(self)
 
         if self._holding:
             self.rect.center = pygame.mouse.get_pos()
+
+
+    def _mouse_on_me(self):
+        _mouse_pos = pygame.mouse.get_pos()
+        if self.rect.collidepoint(_mouse_pos):
+            return True
+        return False
+
+    def draw(self):
+        if image := self.image:
+            screen.blit(image, self.rect)
+        else:
+            pygame.draw.rect(screen, self.color, self.rect)
+
+class ItemSolt:
+    def __init__(self, *, x, y, width, height, image=None, color=(0, 0, 0), item: Item = None):
+        self.rect = pygame.Rect(x, y, width, height)  # 不太好翻译反正是自己的rect
+        self.image = image  # 显示的图像
+        self.color = color  # 没有图像时显示的色块
+        self.visible = True  # 是否渲染
+        self.active = True  # 是否更新逻辑
+        self.item = item
+
+        self._holding = False
+
+    def update(self, event: pygame.event.Event):
+        if not self.active: return
+
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            self._holding = self._mouse_on_me() and pygame.mouse.get_pressed()[0]
+            if self._holding:
+                update_queue.append(DragObject(x=10, y=10, width=64, height=64, color=(255, 0, 0)))
+        elif event.type == pygame.MOUSEBUTTONUP:
+            self._holding = False
+
 
 
     def _mouse_on_me(self):
@@ -59,15 +95,17 @@ clock = pygame.time.Clock()
 font = pygame.font.Font(None, 36)
 
 
-solt = DragObject(x=10, y=10, width=64, height=64)
-objects = [solt]
+solt = ItemSolt(x=10, y=10, width=64, height=64)
+
+update_queue = [solt]
 
 # 主循环
 running = True
 while running:
     # 处理事件
     for event in pygame.event.get():
-        solt.update(event)
+        for obj in update_queue:
+            obj.update(event)
 
         if event.type == pygame.QUIT:
             running = False
@@ -79,7 +117,9 @@ while running:
 
 
     mouse_pos = pygame.mouse.get_pos()
-    solt.draw()
+    for obj in update_queue:
+        obj.draw()
+
 
     # 更新显示
     pygame.display.flip()
