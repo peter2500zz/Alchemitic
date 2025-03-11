@@ -19,6 +19,12 @@ class Item(ABC):
             cls._instance = super().__new__(cls, *args, **kwargs)
         return cls._instance
 
+    def provides(self):
+        """
+        返回提供的源质要素
+        """
+        return self._essentia_provide
+
     def can_be_crafted(self, essentia: Essentia) -> bool:
         """
         用于判断是否可以制作该物品，与制作花费是分离的，更倾向于表示制作此物品需要达到的条件而非花费
@@ -37,6 +43,7 @@ def item_register(cls: Item):
     将物品注册为可用
     """
     valid_item[cls.__name__] = cls()  # 不要管pycharm的注释，单例cls就是要实例化
+    return cls
 
 
 @item_register
@@ -46,33 +53,31 @@ class FlamePoison(Item):
     _essentia_provide = Essentia(Ignis=1)
 
     def can_be_crafted(self, essentia: Essentia) -> bool:
-        craft_condition = essentia >= Essentia(Ignis=1) and essentia < Essentia(Aqua=1)
+        craft_condition = essentia >= Essentia(Ignis=2) and essentia < Essentia(Aqua=1)
         if craft_condition:
             return True
         return False
 
 @item_register
 class SpeedPoison(Item):
-    name = 'Speed poison'
-    desc = 'Run faster.'
-    _craft_cost = Essentia(Aer=0.7)
-    _essentia_provide = Essentia(Aer=0.1)
+    name = '速度药水'
+    _craft_cost = Essentia(Aer=2)
+    _essentia_provide = Essentia(Aer=1)
 
     def can_be_crafted(self, essentia: Essentia) -> bool:
-        craft_condition = essentia >= Essentia(Aer=1)
+        craft_condition = essentia >= Essentia(Aer=2)
         if craft_condition:
             return True
         return False
 
 @item_register
 class FlameFlower(Item):
-    name = 'Flame flower'
-    desc = 'A burning flower.'
-    _essentia_provide = Essentia(Ignis=0.5)
+    name = '火焰花'
+    _essentia_provide = Essentia(Ignis=1)
 
+@item_register
 class Rinkangu(Item):
-    name = 'Rinkangu'
-    desc = 'Rinkangurigurigurikuacya...'
+    name = '灵感菇'
     _essentia_provide = Essentia(Ignis=1, Aqua=1, Aer=1, Terra=1)
 
 def craft(aspects: Essentia, target: Item):

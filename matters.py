@@ -7,6 +7,7 @@ class Essentia:
     这里是源质类，可以将输入的要素打包为一组源质
     也可以参与比较
     """
+
     def __init__(self, **kwargs):
         self._essentia = {}
         for aspect, concentration in kwargs.items():
@@ -204,6 +205,7 @@ def essentia_register(cls: Aspects):
     将源质要素注册为可用
     """
     valid_essentia[cls.__name__] = cls()  # 不要管pycharm的注释，单例cls就是要实例化
+    return cls
 
 
 @essentia_register
