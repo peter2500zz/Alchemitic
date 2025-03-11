@@ -178,7 +178,7 @@ class Aspects(ABC):
     desc = 'unknown'  # 物品描述
 
     _creatable = False
-    _need = Essentia()
+    _create_cost = Essentia()
 
     _instance = None
 
@@ -188,7 +188,10 @@ class Aspects(ABC):
         return cls._instance
 
     def can_be_created(self, essentia: Essentia):
-        if essentia >= self._need and self._creatable:
+        """
+        在没有重载的情况下简单判断是否大于
+        """
+        if essentia >= self._create_cost and self._creatable:
             return True
         return False
 
@@ -197,6 +200,9 @@ valid_essentia = {}
 
 
 def essentia_register(cls: Aspects):
+    """
+    将源质要素注册为可用
+    """
     valid_essentia[cls.__name__] = cls()  # 不要管pycharm的注释，单例cls就是要实例化
 
 
@@ -224,7 +230,7 @@ class Terra(Aspects):
 class Lux(Aspects):
     name = '光明'
     _creatable = True
-    _need = Essentia(Ignis=1, Aer=1)
+    _create_cost = Essentia(Ignis=1, Aer=1)
 
 
 if __name__ == '__main__':

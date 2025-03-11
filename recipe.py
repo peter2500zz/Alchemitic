@@ -6,8 +6,11 @@ from matters import Essentia
 class Item(ABC):
     name = 'unknown'  # 物品名词
     desc = 'unknown'  # 物品描述
-    craft_cost = Essentia()  # 制作花费
-    aspect_provide = Essentia()  # 分解返还
+
+    _craftable = False  # 是否可以被制作
+    _craft_cost = Essentia()  # 制作花费
+    _providable = False  # 是否可以提供源质要素
+    _essentia_provide = Essentia()  # 分解提供的源质要素
 
     _instance = None
 
@@ -16,48 +19,61 @@ class Item(ABC):
             cls._instance = super().__new__(cls, *args, **kwargs)
         return cls._instance
 
-    def can_be_crafted(self, aspects: Essentia) -> bool:
+    def can_be_crafted(self, essentia: Essentia) -> bool:
         """
         用于判断是否可以制作该物品，与制作花费是分离的，更倾向于表示制作此物品需要达到的条件而非花费
+        默认情况仅判断是否比花费多
         """
-        return False
-
-
-class FlamePoison(Item):
-    name = 'Flame poison'
-    desc = 'Burn them down.'
-    craft_cost = Essentia(Ignis=1)
-    aspect_provide = Essentia(Ignis=0.3)
-
-    def can_be_crafted(self, aspects: Essentia) -> bool:
-        craft_condition = aspects >= Essentia(Ignis=1) and aspects < Essentia(Aqua=1)
-        if craft_condition:
+        if essentia >= self._craft_cost and self._craftable:
             return True
         return False
 
 
+valid_item = {}
+
+
+def item_register(cls: Item):
+    """
+    将物品注册为可用
+    """
+    valid_item[cls.__name__] = cls()  # 不要管pycharm的注释，单例cls就是要实例化
+
+
+@item_register
+class FlamePoison(Item):
+    name = '火焰药水'
+    _craft_cost = Essentia(Ignis=2)
+    _essentia_provide = Essentia(Ignis=1)
+
+    def can_be_crafted(self, essentia: Essentia) -> bool:
+        craft_condition = essentia >= Essentia(Ignis=1) and essentia < Essentia(Aqua=1)
+        if craft_condition:
+            return True
+        return False
+
+@item_register
 class SpeedPoison(Item):
     name = 'Speed poison'
     desc = 'Run faster.'
-    craft_cost = Essentia(Aer=0.7)
-    aspect_provide = Essentia(Aer=0.1)
+    _craft_cost = Essentia(Aer=0.7)
+    _essentia_provide = Essentia(Aer=0.1)
 
-    def can_be_crafted(self, aspects: Essentia) -> bool:
-        craft_condition = aspects >= Essentia(Aer=1)
+    def can_be_crafted(self, essentia: Essentia) -> bool:
+        craft_condition = essentia >= Essentia(Aer=1)
         if craft_condition:
             return True
         return False
 
-
+@item_register
 class FlameFlower(Item):
     name = 'Flame flower'
     desc = 'A burning flower.'
-    aspect_provide = Essentia(Ignis=0.5)
+    _essentia_provide = Essentia(Ignis=0.5)
 
 class Rinkangu(Item):
     name = 'Rinkangu'
     desc = 'Rinkangurigurigurikuacya...'
-    aspect_provide = Essentia(Ignis=1, Aqua=1, Aer=1, Terra=1)
+    _essentia_provide = Essentia(Ignis=1, Aqua=1, Aer=1, Terra=1)
 
 def craft(aspects: Essentia, target: Item):
     if target.can_be_crafted(aspects):
@@ -67,9 +83,6 @@ def craft(aspects: Essentia, target: Item):
     else:
         print(f'Can not craft {target.name}')
     return aspects
-
-
-valid_item = [item() for item in Item.__subclasses__()]
 
 inventory = {
 
