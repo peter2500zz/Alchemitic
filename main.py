@@ -4,7 +4,7 @@ from tkinter import ttk
 # 创建主窗口
 root = tk.Tk()
 root.title("Tkinter 示例程序")
-root.geometry("800x600")      # 设置窗口大小
+root.geometry("800x450")      # 设置窗口大小
 root.resizable(False, False)  # 锁定窗口大小不可调整
 
 # 创建样式对象
