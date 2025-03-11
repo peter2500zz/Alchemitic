@@ -1,4 +1,5 @@
 from AlchemyError import *
+from abc import abstractmethod, ABC
 
 ARCHES = [
     'Ignis',
@@ -7,7 +8,6 @@ ARCHES = [
     'Terra'
 ]
 
-
 class Aspects:
 
     def __init__(self, **kwargs):
@@ -15,7 +15,7 @@ class Aspects:
         for aspect, concentration in kwargs.items():
             if concentration < 0:
                 raise AspectBelowZero(aspect)
-            if aspect in ARCHES:
+            if aspect in essentia:
                 self._aspects[aspect] = round(concentration, 2)
             else:
                 raise AspectInvalid(aspect)
@@ -173,10 +173,54 @@ class Aspects:
         return True
 
 
+class Essentia(ABC):
+    name = 'unknown'  # 物品名词
+    desc = 'unknown'  # 物品描述
+
+    _creatable = False
+
+    _instance = None
+    def __new__(cls, *args, **kwargs):
+        if not cls._instance:
+            cls._instance = super().__new__(cls, *args, **kwargs)
+        return cls._instance
+
+    def can_be_crafted(self) -> bool:
+        """
+        用于判断是否可以制作该物品，与制作花费是分离的，更倾向于表示制作此物品需要达到的条件而非花费
+        """
+        return False
+
+essentia = {}
+def essentia_register(cls: Essentia):
+    essentia[cls.__name__] = cls
+
+@essentia_register
+class Ignis(Essentia):
+    name = '火'
+
+@essentia_register
+class Aqua(Essentia):
+    name = '水'
+
+@essentia_register
+class Aer(Essentia):
+    name = '风'
+
+@essentia_register
+class Terra(Essentia):
+    name = '地'
+
+@essentia_register
+class Lux(Essentia):
+    name = '光明'
+    _creatable = True
+    _need = Aspects(Ignis=1, Aer=1)
+
 
 if __name__ == '__main__':
-    test_asp = Aspects(Ignis=0.5, Terra=1, Aqua=1)
-    test_asp2 = Aspects(Ignis=0.5)
+    test_asp = Aspects(Ignis=1)
+    test_asp2 = Aspects(Ignis=1, Lux=1)
     print(test_asp < test_asp2 + test_asp)
 
 
