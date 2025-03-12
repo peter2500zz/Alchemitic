@@ -26,6 +26,12 @@ class UIManager:
             if obj.handle_event(event, self):  # 是否消费此event
                 break
 
+    def update(self):
+        pass
+
+    def draw(self, screen: pygame.Surface):
+        for obj in self._frames.get(self._current_frame, []):  # 倒序来确保最新添加的最先判断
+            obj.draw(screen)
 
 
 if __name__ == '__main__':

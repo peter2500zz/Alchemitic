@@ -26,12 +26,11 @@ while running:
     screen.fill(WHITE)
     # 开始绘制
 
-    test_block.draw(screen)
+    ui.draw(screen)
 
     # 绘制结束
     pygame.display.flip()
 
-    # ui.update(screen)
     clock.tick(60)
 
 pygame.quit()
