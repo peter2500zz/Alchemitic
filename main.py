@@ -1,32 +1,5 @@
-import pygame
-from abc import ABC, abstractmethod
-import item
-
-# 颜色常量
-WHITE = (255, 255, 255)
-BLACK = (0, 0, 0)
-BLUE = (0, 0, 255)
-
-
-class PgObject(ABC):
-    def __init__(self, rect, color=BLACK):
-        self.rect = pygame.Rect(rect)
-        self.color = color
-        self.active = True
-        self.visible = True
-
-    @abstractmethod
-    def handle_event(self, event, manager):
-        pass
-
-    @abstractmethod
-    def draw(self, surface):
-        pass
-
-    def collide_point(self, point):
-        return self.rect.collidepoint(point)
-
-
+from gui.base_object import *
+from gui.ui_mgr import UIManager
 
 # 初始化及使用示例
 pygame.init()
@@ -34,19 +7,26 @@ screen = pygame.display.set_mode((800, 450))
 clock = pygame.time.Clock()
 
 # 我自己的变量
+test_block = TestObject((10, 10, 32, 32), RED)
+ui = UIManager()
+ui.add(test_block)
 
-
+# 我都变量定义结束
 
 running = True
 while running:
 
     for event in pygame.event.get():
+        ui.handle_event(event)
+
         if event.type == pygame.QUIT:
             running = False
-        # ui.handle_event(event)
+
 
     screen.fill(WHITE)
     # 开始绘制
+
+    test_block.draw(screen)
 
     # 绘制结束
     pygame.display.flip()
