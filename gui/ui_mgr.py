@@ -27,7 +27,11 @@ class UIManager:
                 break
 
     def update(self):
-        pass
+        """
+        遍历更新，目前来讲先加入的先更新
+        """
+        for obj in self._frames.get(self._current_frame, []):  # 倒序来确保最新添加的最先判断
+            obj.update(self)
 
     def draw(self, screen: pygame.Surface):
         for obj in self._frames.get(self._current_frame, []):  # 倒序来确保最新添加的最先判断
