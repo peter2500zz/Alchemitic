@@ -1,7 +1,11 @@
+from __future__ import annotations
 import pygame
 
-from gui.base_object import PgObject, TestObject
 from gui.colors import WHITE
+
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from gui.base_object import PgObject, TestObject
 
 
 class UIManager:

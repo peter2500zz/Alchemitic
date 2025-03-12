@@ -1,8 +1,12 @@
+from __future__ import annotations
 from abc import ABC, abstractmethod
 import pygame
 
 from gui.colors import *
-from gui.ui_mgr import UIManager
+
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from gui.ui_mgr import UIManager
 
 
 class PgObject(ABC):
@@ -26,7 +30,7 @@ class PgObject(ABC):
         """
         if not self.active:
             return
-        self._handle_event(event, manager)
+        return self._handle_event(event, manager)
 
     @abstractmethod
     def _handle_event(self, event: pygame.event.Event, manager: UIManager):
@@ -39,7 +43,7 @@ class PgObject(ABC):
         """
         if not self.active:
             return
-        self._update(manager)
+        return self._update(manager)
 
     @abstractmethod
     def _update(self, manager: UIManager):
@@ -51,7 +55,7 @@ class PgObject(ABC):
         """
         if not self.visible:  # todo! 不确定是否要一起判断 active
             return
-        self._draw(surface, manager)
+        return self._draw(surface, manager)
 
     @abstractmethod
     def _draw(self, surface: pygame.Surface, manager: UIManager):
