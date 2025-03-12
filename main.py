@@ -1,131 +1,57 @@
 import pygame
-from recipe import valid_item, Item
+from abc import ABC, abstractmethod
+import item
 
+# 颜色常量
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
-RED = (255, 0, 0)
-GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
-YELLOW = (255, 255, 0)
-MAGENTA = (255, 0, 255)
-CYAN = (0, 255, 255)
 
 
-class DragObject:
-    def __init__(self, *, x, y, width, height, image=None, color=(0, 0, 0)):
-        self.rect = pygame.Rect(x, y, width, height)  # 不太好翻译反正是自己的rect
-        self.image = image  # 显示的图像
-        self.color = color  # 没有图像时显示的色块
-        self.visible = True  # 是否渲染
-        self.active = True  # 是否更新逻辑
+class PgObject(ABC):
+    def __init__(self, rect, color=BLACK):
+        self.rect = pygame.Rect(rect)
+        self.color = color
+        self.active = True
+        self.visible = True
 
-        self._holding = False
+    @abstractmethod
+    def handle_event(self, event, manager):
+        pass
 
+    @abstractmethod
+    def draw(self, surface):
+        pass
 
-    def update(self, event: pygame.event.Event):
-        if not self.active: return
-
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            self._holding = self._mouse_on_me() and pygame.mouse.get_pressed()[0]
-        elif event.type == pygame.MOUSEBUTTONUP:
-            self._holding = False
-            update_queue.remove(self)
-
-        if self._holding:
-            self.rect.center = pygame.mouse.get_pos()
-
-
-    def _mouse_on_me(self):
-        _mouse_pos = pygame.mouse.get_pos()
-        if self.rect.collidepoint(_mouse_pos):
-            return True
-        return False
-
-    def draw(self):
-        if image := self.image:
-            screen.blit(image, self.rect)
-        else:
-            pygame.draw.rect(screen, self.color, self.rect)
-
-class ItemSolt:
-    def __init__(self, *, x, y, width, height, image=None, color=(0, 0, 0), item: Item = None):
-        self.rect = pygame.Rect(x, y, width, height)  # 不太好翻译反正是自己的rect
-        self.image = image  # 显示的图像
-        self.color = color  # 没有图像时显示的色块
-        self.visible = True  # 是否渲染
-        self.active = True  # 是否更新逻辑
-        self.item = item
-
-        self._holding = False
-
-    def update(self, event: pygame.event.Event):
-        if not self.active: return
-
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            self._holding = self._mouse_on_me() and pygame.mouse.get_pressed()[0]
-            if self._holding:
-                update_queue.append(DragObject(x=10, y=10, width=64, height=64, color=(255, 0, 0)))
-        elif event.type == pygame.MOUSEBUTTONUP:
-            self._holding = False
+    def collide_point(self, point):
+        return self.rect.collidepoint(point)
 
 
 
-    def _mouse_on_me(self):
-        _mouse_pos = pygame.mouse.get_pos()
-        if self.rect.collidepoint(_mouse_pos):
-            return True
-        return False
-
-    def draw(self):
-        if image := self.image:
-            screen.blit(image, self.rect)
-        else:
-            pygame.draw.rect(screen, self.color, self.rect)
-
-# 初始化 Pygame
+# 初始化及使用示例
 pygame.init()
-
-# 创建固定大小的窗口（不可调整）
-screen = pygame.display.set_mode((800, 450), flags=0)
-pygame.display.set_caption("基础窗口")
-
-# 创建时钟对象控制帧率
+screen = pygame.display.set_mode((800, 450))
 clock = pygame.time.Clock()
 
-font = pygame.font.Font(None, 36)
+# 我自己的变量
 
 
-solt = ItemSolt(x=10, y=10, width=64, height=64)
 
-update_queue = [solt]
-
-# 主循环
 running = True
 while running:
-    # 处理事件
-    for event in pygame.event.get():
-        for obj in update_queue:
-            obj.update(event)
 
+    for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+        # ui.handle_event(event)
 
-
-
-    # 填充背景色
     screen.fill(WHITE)
+    # 开始绘制
 
-
-    mouse_pos = pygame.mouse.get_pos()
-    for obj in update_queue:
-        obj.draw()
-
-
-    # 更新显示
+    # 绘制结束
     pygame.display.flip()
 
-    # 控制帧率为 60 FPS
+    # ui.update(screen)
     clock.tick(60)
 
-# 退出 Pygame
 pygame.quit()
