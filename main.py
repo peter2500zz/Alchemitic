@@ -1,16 +1,19 @@
 from gui.base_object import *
 from gui.ui_mgr import UIManager
 
+
 # 初始化及使用示例
 pygame.init()
 screen = pygame.display.set_mode((800, 450))
 clock = pygame.time.Clock()
 
 # 我自己的变量
-test_block = DraggableObject((10, 10, 32, 32), RED)
+test_block = DraggableObject((20, 20, 64, 64), RED)
+test_block2 = DraggableObject((96, 20, 64, 64), BLUE)
 ui = UIManager()
-ui.add(test_block)
+ui.add(test_block, test_block2)
 
+print(ui.query(DraggableObject))  # 测试query功能
 # 我都变量定义结束
 
 running = True
