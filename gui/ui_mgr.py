@@ -5,6 +5,7 @@ from gui.colors import WHITE
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
+    # 可能有一些耦合度问题
     from gui.base_object import PgObject, TestObject
 
 
