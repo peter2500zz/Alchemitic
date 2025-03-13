@@ -71,7 +71,7 @@ class PgObject(ABC):
 
     @abstractmethod
     def _draw(self, surface: pygame.Surface, manager: UIManager) -> None:
-        pass
+        pygame.draw.rect(surface, self.color, self.rect)
 
 
 class DraggableObject(PgObject):
@@ -113,12 +113,14 @@ class DraggableObject(PgObject):
 
         return False
 
+    @abstractmethod
     def _on_drag_start(self, manager: UIManager) -> None:
         """
         在开始拖拽时触发
         """
         pass
 
+    @abstractmethod
     def _on_drag_end(self, manager: UIManager) -> None:
         """
         在结束拖拽时触发
@@ -137,5 +139,49 @@ class DraggableObject(PgObject):
                 mouse_pos[1] - self._mouse_offset[1]
             )
 
-    def _draw(self, surface, manager):
-        pygame.draw.rect(surface, self.color, self.rect)
+    def _draw(self, surface: pygame.Surface, manager: UIManager) -> None:
+        super()._draw(surface, manager)
+
+
+class BtnObject(PgObject):
+    """
+    按钮obj类
+    """
+    def __init__(self, rect, color=BLACK):
+        super().__init__(rect, color)
+
+        self.pressed = False
+
+    def _handle_event(self, event, manager) -> bool:
+        """
+        当按下时候调用 _on_clicked hook 方法
+        """
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if self.rect.collidepoint(event.pos):
+                # 如果鼠标左键按下时在自身范围内则设定按住为 True
+                self.pressed = True
+
+        if event.type == pygame.MOUSEBUTTONUP:
+            if self.pressed:
+                # 如果被按住先释放
+                self.pressed = False
+                if self.rect.collidepoint(event.pos):
+                    # 如果在自身范围内释放则调用 _on_clicked
+                    self._on_clicked(manager)
+
+        return False
+
+    @abstractmethod
+    def _on_clicked(self, manager: UIManager) -> None:
+        """
+        当按下时触发
+        按下的定义在 _handle_event 里
+        """
+        pass
+    
+    def _update(self, manager):
+        pass
+
+    def _draw(self, surface: pygame.Surface, manager: UIManager) -> None:
+        super()._draw(surface, manager)
+
