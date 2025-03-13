@@ -5,12 +5,10 @@ from core.resources.resource import Resource
 
 
 class Inventory:
-    # todo! 将字典存储结构改为 类: 数量
-    # todo! 可能的问题： 对于有耐久度的实例来说无法保存数据
-    # todo! 总之就是取舍运行效率
     def __init__(self, *resources: Resource):
         self._inventory: dict[type[Resource], Resource] = {}
 
+        # 用 add 方法添加解包的参数
         self.add(*resources)
 
     def add(self, *resources: Resource):
@@ -71,23 +69,31 @@ class Inventory:
         return new_inventory
 
     def list(self, order: str = '') -> list[Resource]:
+        """
+        返回由自身库存组成的列表
+
+        :param order: 可选值 (name/type/num)。分别按照 名称 0-9A-Za-z / 种类 0-9A-Za-z / 数量 高-低 排序
+        :return: 由自身库存组成的列表
+        """
+        resource_list: list = list(self._inventory.values())
         match order:
             case 'name':
                 pass  # todo! 按照名字排序
             case 'type':
                 pass  # todo! 按照种类排序
             case 'num':
-                pass  # todo! 按照数量排序
-            case _:
-                # 不排序
-                pass
-        return list(self._inventory.values())
+                resource_list.sort(key=lambda x: x.num)
+                resource_list = list(reversed(resource_list))
+
+        print([(x.__class__.__name__, x.num) for x in resource_list])
+        return resource_list
 
     def include(self, other) -> bool:
         """
         我比他多，对的对的。我没他多，错的错的。一样多？对喽！
 
         :param other: 可以是 Inventory 或者 Resource，如果是 Inventory 则会比较每一项
+        :return: other 是否是自身的子集
         """
         if not isinstance(other, (Inventory, Resource)):
             return NotImplemented
@@ -109,6 +115,7 @@ class Inventory:
         if not isinstance(other, Inventory):
             return NotImplemented
 
+        # 以互为子集的方式判断相等
         return self.include(other) and other.include(self)
 
     def __ne__(self, other):
@@ -123,11 +130,11 @@ if __name__ == '__main__':
         pass
 
     res1 = sub1(5)
-    res2 = sub2()
+    res2 = sub2(99)
     res3 = sub1(5)
     res4 = sub2()
 
     inv1 = Inventory(res1, res2)
     inv2 = Inventory(res3, res2)
-    print(inv1 != inv2)
+    print([(x.__class__.__name__, x.num) for x in inv1.list('num')])
 
