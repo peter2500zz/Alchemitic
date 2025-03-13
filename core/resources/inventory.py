@@ -5,6 +5,9 @@ from core.resources.resource import Resource
 
 
 class Inventory:
+    # todo! 将字典存储结构改为 类: 数量
+    # todo! 可能的问题： 对于有耐久度的实例来说无法保存数据
+    # todo! 总之就是取舍运行效率
     def __init__(self, *resources: Resource):
         self._inventory: dict[type[Resource], Resource] = {}
 
@@ -23,7 +26,10 @@ class Inventory:
                 self._inventory[type(resource)] = deepcopy(resource)
 
     def __add__(self, other):
-        if not isinstance(other, self.__class__):
+        """
+        Inventory 类之间的加法
+        """
+        if not isinstance(other, Inventory):
             return NotImplemented
 
         new_inventory = Inventory(*self._inventory.values())
@@ -52,7 +58,11 @@ class Inventory:
             # else 不做任何处理因为本就不存在无需移除
 
     def __sub__(self, other):
-        if not isinstance(other, self.__class__):
+        """
+        Inventory 类之间的减法
+        不会启用 self.remove 的 just_do_it
+        """
+        if not isinstance(other, Inventory):
             return NotImplemented
 
         new_inventory = Inventory(*self._inventory.values())
@@ -60,132 +70,50 @@ class Inventory:
 
         return new_inventory
 
-    """
-    def sub(self, other):
-        if not isinstance(other, Essentia):
+    def list(self, order: str = '') -> list[Resource]:
+        match order:
+            case 'name':
+                pass  # todo! 按照名字排序
+            case 'type':
+                pass  # todo! 按照种类排序
+            case 'num':
+                pass  # todo! 按照数量排序
+            case _:
+                # 不排序
+                pass
+        return list(self._inventory.values())
+
+    def include(self, other) -> bool:
+        """
+        我比他多，对的对的。我没他多，错的错的。一样多？对喽！
+
+        :param other: 可以是 Inventory 或者 Resource，如果是 Inventory 则会比较每一项
+        """
+        if not isinstance(other, (Inventory, Resource)):
             return NotImplemented
 
-        fused_essentia = {**self._essentia}
-        for aspect, concentration in other._essentia.items():
-            if aspect not in fused_essentia:
-                AspectNotFound(aspect)
-            elif fused_essentia[aspect] - concentration < 0:
-                fused_essentia[aspect] = 0
-            else:
-                fused_essentia[aspect] -= concentration
+        resources = []
+        if isinstance(other, Inventory):
+            resources = [*other.list()]
+        elif isinstance(other, Resource):
+            resources = [other]
 
-        return Essentia(**fused_essentia)
-
-        # 以类变量形式获取要素
-
-    def __getattr__(self, aspect):
-        if aspect in self._essentia:
-            return self._essentia[aspect]
-        else:
-            return None
-
-    def __str__(self):
-        return str(self._essentia)
-
-        # 要素的比较
-
-    def __lt__(self, other):
-        if not isinstance(other, Essentia):
-            return NotImplemented
-
-        # 遍历右侧的每一个要素，如果左侧对应要素的浓度比右侧小或者干脆没有这个要素则为真
-        # 如果有一个等于或比右边大就False
-        for right_essentia, right_concentration in other._essentia.items():
-            left_concentration = self._essentia.get(right_essentia, None)
-            if left_concentration is None or left_concentration < right_concentration:
-                break
-        else:
-            return False
-        return True
-
-    def __le__(self, other):
-        if not isinstance(other, Essentia):
-            return NotImplemented
-
-        # 遍历右侧的每一个要素，如果左侧对应要素的浓度小于等于右侧或者干脆没有这个要素则为真
-        # 如果有一个比右边大就False
-        for right_essentia, right_concentration in other._essentia.items():
-            left_concentration = self._essentia.get(right_essentia, None)
-            if left_concentration is None or left_concentration <= right_concentration:
-                break
-        else:
-            return False
+        for resource in resources:
+            res_type = type(resource)
+            self_resource = self._inventory.get(res_type, res_type(0))
+            if self_resource.num < resource.num:
+                return False
         return True
 
     def __eq__(self, other):
-        if not isinstance(other, Essentia):
+        if not isinstance(other, Inventory):
             return NotImplemented
 
-        # 对于右边拥有的变量，左边有一个对应的不一样就False
-        for right_essentia, right_concentration in other._essentia.items():
-            left_concentration = self._essentia.get(right_essentia, None)
-            if left_concentration != right_concentration:
-                break
-        else:
-            return True
-        return False
+        return self.include(other) and other.include(self)
 
     def __ne__(self, other):
-        if not isinstance(other, Essentia):
-            return NotImplemented
-
-        # 对于右边拥有的变量，左边对应全部一样就False
-        for right_essentia, right_concentration in other._essentia.items():
-            left_concentration = self._essentia.get(right_essentia, None)
-            if left_concentration != right_concentration:
-                break
-        else:
-            return False
-        return True
-
-    def __gt__(self, other):
-        if not isinstance(other, Essentia):
-            return NotImplemented
-
-        # 遍历右侧的每一个要素，如果左侧对应要素存在且要素的浓度大于右侧则为真
-        # 如果不存在或者有一个等于或比右边小就False
-        for right_essentia, right_concentration in other._essentia.items():
-            left_concentration = self._essentia.get(right_essentia, None)
-            if left_concentration is None or left_concentration <= right_concentration:
-                break
-        else:
-            return True
-        return False
-
-    def __ge__(self, other):
-        if not isinstance(other, Essentia):
-            return NotImplemented
-
-        # 遍历右侧的每一个要素，如果左侧对应要素存在且要素的浓度大于等于右侧则为真
-        # 如果不存在或者有一个比右边小就False
-        for right_essentia, right_concentration in other._essentia.items():
-            left_concentration = self._essentia.get(right_essentia, None)
-            if left_concentration is None or left_concentration < right_concentration:
-                break
-        else:
-            return True
-        return False
-
-    def same_with(self, other):
-        if not isinstance(other, Essentia):
-            return NotImplemented
-
-        if self._essentia != other._essentia:
-            return False
-        return True
-
-    def diff_with(self, other):
-        if not isinstance(other, Essentia):
-            return NotImplemented
-        if self._essentia == other._essentia:
-            return False
-        return True
-    """
+        eq_result = self.__eq__(other)
+        return NotImplemented if eq_result is NotImplemented else not eq_result
 
 
 if __name__ == '__main__':
@@ -196,13 +124,10 @@ if __name__ == '__main__':
 
     res1 = sub1(5)
     res2 = sub2()
+    res3 = sub1(5)
+    res4 = sub2()
 
     inv1 = Inventory(res1, res2)
+    inv2 = Inventory(res3, res2)
+    print(inv1 != inv2)
 
-    inv2 = Inventory(res1, res2, res2)
-    for i in inv2._inventory.values():
-        print(i.__class__.__name__, i.num)
-    inv2 -= inv1
-    print(inv2._inventory)
-    for i in inv2._inventory.values():
-        print(i.__class__.__name__, i.num)
