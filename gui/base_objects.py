@@ -18,7 +18,7 @@ class PgObject(ABC):
         update()
         draw()
     """
-    def __init__(self, rect, color=BLACK):
+    def __init__(self, rect, *, color=BLACK):
         self.rect = pygame.Rect(rect)  # 自身的rect
         self.color = color  # 无图片时绘制的纯色色块
         self.active = True  # 是否更新逻辑
@@ -79,8 +79,8 @@ class DraggableObject(PgObject):
     可拖动物体类
     设想情况下鼠标点击实例开始拖动，松开则停止
     """
-    def __init__(self, rect, color=BLACK):
-        super().__init__(rect, color)
+    def __init__(self, rect, *, color=BLACK):
+        super().__init__(rect, color=color)
 
         # 有关拖拽的判定
         self._drag_tigger_key: int = 1  # 触发拖拽与释放的鼠标按钮 todo! 可能需要区分开始和结束拖拽的按键
@@ -91,6 +91,8 @@ class DraggableObject(PgObject):
     def _handle_event(self, event, manager) -> bool:
         """
         不强制子类重写，简化代码，转而调用 drag 的两个 hook 方法
+
+        :return: 是否消费这一次 event
         """
         # 这两个if处理鼠标按下和抬起的事件
         if event.type == pygame.MOUSEBUTTONDOWN:
@@ -147,8 +149,8 @@ class BtnObject(PgObject):
     """
     按钮obj类
     """
-    def __init__(self, rect, color=BLACK):
-        super().__init__(rect, color)
+    def __init__(self, rect, *, color=BLACK):
+        super().__init__(rect, color=color)
 
         self.pressed = False
 

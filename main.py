@@ -1,33 +1,19 @@
-from gui.base_object import *
+from gui.game_objects import *
+from gui.base_objects import *
 from gui.ui_mgr import UIManager
 
 
 # ==== 测试用的类 ====
-class TestObject(PgObject):
-    """
-    测试类别管它
-    """
-    def _handle_event(self, event, manager):
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            if event.button == 1:
-                print(f'Button 1 pressed')
-
-    def _update(self, manager):
-        pass
-
-    def _draw(self, surface, manager):
-        pygame.draw.rect(surface, self.color, self.rect)
-
 class DragTestObject(DraggableObject):
     def _on_drag_start(self, manager: UIManager) -> None:
-        print(f'{self} was dragged')
+        print(f'{self.color} 被拖拽')
 
     def _on_drag_end(self, manager: UIManager) -> None:
-        print(f'{self} was released')
+        print(f'{self.color} 被释放')
 
 class BtnTestObject(BtnObject):
     def _on_clicked(self, manager: UIManager) -> None:
-        print(f'{self} was clicked')
+        print(f'{self.color} 被点击')
 
 # 初始化及使用示例
 pygame.init()
@@ -35,17 +21,18 @@ screen = pygame.display.set_mode((800, 450))
 clock = pygame.time.Clock()
 
 # 我自己的变量
-test_block = BtnTestObject((20, 20, 64, 64), RED)
-test_block2 = DragTestObject((96, 20, 64, 64), BLUE)
+test_block = BtnTestObject((20, 20, 64, 64), color=RED)
+test_block2 = DragTestObject((96, 20, 64, 64), color=BLUE)
+test_block3 = ItemSoltObject((96, 96, 64, 64), color=YELLOW, storage=ItemObject((0, 0, 48, 48), color=CYAN))
 ui = UIManager()
-ui.add(test_block, test_block2)
+ui.add(test_block, test_block2, test_block3)
 
 print(ui.query(DraggableObject))  # 测试query功能
 # 我都变量定义结束
 
 running = True
 while running:
-
+    # print(ui._frames)
     # ==== 按键输入 ====
     for event in pygame.event.get():
         ui.handle_event(event)

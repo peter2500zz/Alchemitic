@@ -1,12 +1,10 @@
 from __future__ import annotations
 import pygame
 
-from gui.colors import WHITE
-
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     # 可能有一些耦合度问题
-    from gui.base_object import PgObject, TestObject
+    from gui.base_objects import PgObject
 
 
 class UIManager:
@@ -57,17 +55,3 @@ class UIManager:
                     result.append(obj)
         return result
 
-
-# 调试区域
-if __name__ == '__main__':
-    ui = UIManager()
-    test = TestObject((0, 0, 0, 0), WHITE)
-    ui.add(test, TestObject((0, 0, 0, 0), WHITE))
-    print(ui._frames)
-    ui.remove(test)
-    print(ui._frames)
-    test2 = TestObject((0, 0, 0, 0), WHITE)
-    ui.add(test, test2)
-    print(ui._frames)
-    ui.remove(test, test2)
-    print(ui._frames)
