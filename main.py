@@ -21,11 +21,15 @@ screen = pygame.display.set_mode((800, 450))
 clock = pygame.time.Clock()
 
 # 我自己的变量
-test_block = BtnTestObject((20, 20, 64, 64), color=RED)
+test_block = BtnTestObject((512, 256, 64, 64), color=RED)
+test_block4 = ItemDestroyObject((256, 256, 72, 72), color=WHITE)
 test_block2 = DragTestObject((96, 20, 64, 64), color=BLUE)
-test_block3 = ItemSoltObject((96, 96, 64, 64), color=YELLOW, storage=ItemObject((0, 0, 48, 48), color=CYAN))
+test_block3 = ItemSoltObject((96, 96, 64, 64), color=YELLOW, item_color=GREEN)
+test_block5 = ItemSoltObject((96, 192, 64, 64), color=YELLOW, item_color=MAGENTA)
+test_block6 = ItemSoltObject((96, 288, 64, 64), color=YELLOW, item_color=CYAN)
+
 ui = UIManager()
-ui.add(test_block, test_block2, test_block3)
+ui.add(test_block, test_block2, test_block3, test_block4, test_block5, test_block6)
 
 print(ui.query(DraggableObject))  # 测试query功能
 # 我都变量定义结束
@@ -44,7 +48,7 @@ while running:
     ui.update()
 
     # ==== 绘制部分 ====
-    screen.fill(WHITE)
+    screen.fill(BLACK)
     # 开始绘制
     ui.draw(screen)
 

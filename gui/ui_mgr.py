@@ -44,7 +44,7 @@ class UIManager:
         for obj in self._frames.get(self._current_frame, []):  # todo! 需要加入一个 z-index 来确保不同层的 obj 分开绘制
             obj.draw(screen, self)
 
-    def query(self, *query_class: object, frame: str = 'main') -> list[object]:
+    def query(self, *query_class: object, frame: str = 'main') -> list:
         """
         参考bevy的query，这样的搜索机制看起来不错
         """

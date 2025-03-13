@@ -38,7 +38,7 @@ class PgObject(ABC):
         return self._handle_event(event, manager)
 
     @abstractmethod
-    def _handle_event(self, event: pygame.event.Event, manager: UIManager) -> bool:
+    def _handle_event(self, event: pygame.event.Event, manager: UIManager) -> bool | bool:
         """
         不与handle_event合并是因为希望省略一些重复的判断代码，这样子类只需要专注处理自己的逻辑
 
@@ -88,7 +88,7 @@ class DraggableObject(PgObject):
         self.holding = False  # 是否正在被拖拽
         self._mouse_offset = (0, 0)  # 拖拽相对鼠标的偏移
 
-    def _handle_event(self, event, manager) -> bool:
+    def _handle_event(self, event, manager):
         """
         不强制子类重写，简化代码，转而调用 drag 的两个 hook 方法
 
@@ -101,8 +101,8 @@ class DraggableObject(PgObject):
                 self.holding = True
                 # 设定一下点击位置与自身位置的偏移，这样拖动起来美观一点
                 self._mouse_offset = (
-                    event.pos[0] - self.rect.left,
-                    event.pos[1] - self.rect.top
+                    event.pos[0] - self.rect.centerx,
+                    event.pos[1] - self.rect.centery
                 )
                 self._on_drag_start(manager)
                 return True  # 如果确认可以开始被拖拽，则消费这一次event防止多个物品被拖拽
@@ -112,8 +112,6 @@ class DraggableObject(PgObject):
             if self.holding and event.button == self._drag_tigger_key:
                 self.holding = False
                 self._on_drag_end(manager)
-
-        return False
 
     @abstractmethod
     def _on_drag_start(self, manager: UIManager) -> None:
@@ -136,7 +134,7 @@ class DraggableObject(PgObject):
         # 如果正在被拖拽则更新自己的位置到鼠标（还有偏移）
         if self.holding:
             mouse_pos = pygame.mouse.get_pos()
-            self.rect.topleft = (
+            self.rect.center = (
                 mouse_pos[0] - self._mouse_offset[0],
                 mouse_pos[1] - self._mouse_offset[1]
             )
@@ -154,24 +152,22 @@ class BtnObject(PgObject):
 
         self.pressed = False
 
-    def _handle_event(self, event, manager) -> bool:
+    def _handle_event(self, event, manager):
         """
         当按下时候调用 _on_clicked hook 方法
         """
         if event.type == pygame.MOUSEBUTTONDOWN:
-            if self.rect.collidepoint(event.pos):
+            if self.rect.collidepoint(event.pos) and event.button == 1:
                 # 如果鼠标左键按下时在自身范围内则设定按住为 True
                 self.pressed = True
 
-        if event.type == pygame.MOUSEBUTTONUP:
+        if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
             if self.pressed:
                 # 如果被按住先释放
                 self.pressed = False
                 if self.rect.collidepoint(event.pos):
                     # 如果在自身范围内释放则调用 _on_clicked
                     self._on_clicked(manager)
-
-        return False
 
     @abstractmethod
     def _on_clicked(self, manager: UIManager) -> None:
