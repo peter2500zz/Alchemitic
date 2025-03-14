@@ -18,7 +18,7 @@ class PgObject(ABC):
         update()
         draw()
     """
-    def __init__(self, rect, *, color=BLACK):
+    def __init__(self, rect=pygame.Rect(0, 0, 0, 0), *, color=BLACK):
         self.rect = pygame.Rect(rect)  # 自身的rect
         self.color = color  # 无图片时绘制的纯色色块
         self.active = True  # 是否更新逻辑

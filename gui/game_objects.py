@@ -1,5 +1,9 @@
 from __future__ import annotations
+
+import pygame
+
 from gui.base_objects import *
+from gui import config as gui_config
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -31,6 +35,7 @@ class ItemSoltObject(DraggableObject):
         super().__init__(rect, color=color)
 
         self.item_color = item_color
+        self.tooltip = ToolTipObject('物品', '描述第一行\n描述第二行\n第三行\n我去这第四行这么长', color=WHITE)
 
     def _on_drag_start(self, manager: UIManager) -> None:
         take_out_item = ItemObject((0, 0, 48, 48), color=self.item_color)
@@ -42,10 +47,14 @@ class ItemSoltObject(DraggableObject):
         pass
 
     def _update(self, manager):
-        pass
+        if self.rect.collidepoint(pygame.mouse.get_pos()):
+            self.tooltip.visible = True
+        else:
+            self.tooltip.visible = False
 
     def _draw(self, surface, manager):
         super()._draw(surface, manager)
+        self.tooltip.draw(surface, manager)
 
 
 class ItemDestroyObject(PgObject):
@@ -73,6 +82,50 @@ class ItemDestroyObject(PgObject):
     
     def _draw(self, surface, manager):
         super()._draw(surface, manager)
+
+
+class ToolTipObject(PgObject):
+    def __init__(self, title: str = '标题',desc: str = '描述', *, color=BLACK):
+        super().__init__(color=color)
+        self.title = title
+        self.desc: list[str] = desc.split('\n')
+        self._font_size = 16
+        self.font = pygame.font.SysFont("microsoftyahei", self._font_size)
+
+        self.visible = False
+
+    def _handle_event(self, event, manager):
+        pass
+
+    def _update(self, manager):
+        pass
+
+    def _draw(self, surface, manager):
+        title = self.font.render(self.title, True, RED)
+
+        desc = [self.font.render(desc, True, BLUE) for desc in self.desc]
+
+        self.rect.width = max(surface.get_rect().width for surface in [title] + desc)
+        self.rect.height = sum(surface.get_rect().height for surface in [title] + desc)
+
+        self.rect.topleft = pygame.mouse.get_pos()
+        self.rect.top -= self._font_size
+        self.rect.left += self._font_size
+
+        if self.rect.right > gui_config.WINDOW_SIZE[0]:
+            self.rect.right = gui_config.WINDOW_SIZE[0]
+        if self.rect.bottom > gui_config.WINDOW_SIZE[1]:
+            self.rect.bottom = gui_config.WINDOW_SIZE[1]
+
+        pygame.draw.rect(surface, self.color, self.rect)
+        text_offset = 0
+        for text_surface in [title] + desc:
+            text_rect = text_surface.get_rect()
+            text_rect.topleft = self.rect.topleft
+            text_rect.top += text_offset
+            surface.blit(text_surface, text_rect)
+            text_offset += text_rect.height
+
 
 # AI 代码
 def blend_colors(rgb_list):

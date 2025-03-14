@@ -1,5 +1,6 @@
 from gui.game_objects import *
 from gui.base_objects import *
+from gui import config as gui_config
 from gui.ui_mgr import UIManager
 
 
@@ -17,7 +18,7 @@ class BtnTestObject(BtnObject):
 
 # 初始化及使用示例
 pygame.init()
-screen = pygame.display.set_mode((800, 450))
+screen = pygame.display.set_mode(gui_config.WINDOW_SIZE)
 clock = pygame.time.Clock()
 
 # 我自己的变量
