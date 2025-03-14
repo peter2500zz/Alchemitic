@@ -30,6 +30,9 @@ class PgObject(ABC):
     def on_create(self, manager: UIManager):
         pass
 
+    def on_remove(self, manager: UIManager):
+        pass
+
     def handle_event(self, event: pygame.event.Event, manager: UIManager) -> bool:
         """
         pygame接收到用户输入时将event提交给obj处理
@@ -78,6 +81,7 @@ class PgObject(ABC):
     @abstractmethod
     def _draw(self, surface: pygame.Surface, manager: UIManager) -> None:
         pygame.draw.rect(surface, self.color, self.rect)
+
 
 
 class DraggableObject(PgObject):
