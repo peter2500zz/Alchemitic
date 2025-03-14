@@ -19,7 +19,10 @@ class UIManager:
         self._current_frame = 'main'
 
     def add(self, *objs: PgObject, frame: str = 'main'):
-        self._frames[frame].extend(objs)
+        for obj in objs:
+            self._frames[frame].append(obj)
+            obj.on_create(self)
+
 
     def remove(self, *objs: PgObject, frame: str = 'main'):
         for obj in objs:
@@ -41,7 +44,10 @@ class UIManager:
             obj.update(self)
 
     def draw(self, screen: pygame.Surface) -> None:
-        for obj in self._frames.get(self._current_frame, []):  # todo! 需要加入一个 z-index 来确保不同层的 obj 分开绘制
+        objs = self._frames.get(self._current_frame, [])
+        objs.sort(key=lambda x: x.z_index.value)
+        # print(objs)
+        for obj in objs:
             obj.draw(screen, self)
 
     def query(self, *query_class: object, frame: str = 'main') -> list:

@@ -4,6 +4,7 @@ import pygame
 
 from gui.base_objects import *
 from gui import config as gui_config
+from gui.config import ZIndex
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -37,11 +38,17 @@ class ItemSoltObject(DraggableObject):
         self.item_color = item_color
         self.tooltip = ToolTipObject('物品', '描述第一行\n描述第二行\n第三行\n我去这第四行这么长', color=WHITE)
 
+        self._takeable = False
+
+    def on_create(self, manager: UIManager):
+        manager.add(self.tooltip)
+
     def _on_drag_start(self, manager: UIManager) -> None:
-        take_out_item = ItemObject((0, 0, 48, 48), color=self.item_color)
-        take_out_item.holding = True
-        manager.add(take_out_item)
-        print(f'从 {self.color} 获取了 {take_out_item.color}')
+        if self._takeable:
+            take_out_item = ItemObject((0, 0, 48, 48), color=self.item_color)
+            take_out_item.holding = True
+            manager.add(take_out_item)
+            print(f'从 {self.color} 获取了 {take_out_item.color}')
 
     def _on_drag_end(self, manager: UIManager) -> None:
         pass
@@ -54,7 +61,6 @@ class ItemSoltObject(DraggableObject):
 
     def _draw(self, surface, manager):
         super()._draw(surface, manager)
-        self.tooltip.draw(surface, manager)
 
 
 class ItemDestroyObject(PgObject):
@@ -79,7 +85,7 @@ class ItemDestroyObject(PgObject):
     def _update(self, manager):
         self.mix_color = self.mix_color[-5:]
         self.color = blend_colors(self.mix_color)
-    
+
     def _draw(self, surface, manager):
         super()._draw(surface, manager)
 
@@ -92,6 +98,7 @@ class ToolTipObject(PgObject):
         self._font_size = 16
         self.font = pygame.font.SysFont("microsoftyahei", self._font_size)
 
+        self.z_index = ZIndex.tooltip
         self.visible = False
 
     def _handle_event(self, event, manager):

@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 import pygame
 
 from gui.colors import *
+from gui.config import ZIndex
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -23,6 +24,11 @@ class PgObject(ABC):
         self.color = color  # 无图片时绘制的纯色色块
         self.active = True  # 是否更新逻辑
         self.visible = True  # 是否可见
+
+        self.z_index = ZIndex.objects
+
+    def on_create(self, manager: UIManager):
+        pass
 
     def handle_event(self, event: pygame.event.Event, manager: UIManager) -> bool:
         """
