@@ -88,6 +88,14 @@ class Inventory:
         print([(x.__class__.__name__, x.num) for x in resource_list])
         return resource_list
 
+    def keys(self):
+        return self._inventory.keys()
+
+    def check_num(self):
+        for resource in self._inventory.copy().values():
+            if resource.num <= 0:
+                self.remove(resource)
+
     def include(self, other) -> bool:
         """
         我比他多，对的对的。我没他多，错的错的。一样多？对喽！

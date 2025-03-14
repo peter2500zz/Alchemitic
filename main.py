@@ -1,20 +1,24 @@
-from gui.game_objects import *
+from core.resources.inventory import Inventory
+from core.resources.resource import Resource
 from gui.base_objects import *
 from gui import config as gui_config
+from gui.game_objects import InventoryManager
 from gui.ui_mgr import UIManager
 
 
 # ==== 测试用的类 ====
-class DragTestObject(DraggableObject):
-    def _on_drag_start(self, manager: UIManager) -> None:
-        print(f'{self.color} 被拖拽')
+class TestRes1(Resource):
+    def __init__(self, num: int = 10):
+        super().__init__(num)
+        self.name = '灵感菇'
+        self.description = '灵感菇力菇力菇力刮擦\n灵感菇 灵感菇'
 
-    def _on_drag_end(self, manager: UIManager) -> None:
-        print(f'{self.color} 被释放')
+class TestRes2(Resource):
+    def __init__(self, num: int = 3):
+        super().__init__(num)
+        self.name = '叮咚鸡'
+        self.description = '叮\n咚鸡\n叮咚鸡'
 
-class BtnTestObject(BtnObject):
-    def _on_clicked(self, manager: UIManager) -> None:
-        print(f'{self.color} 被点击')
 
 # 初始化及使用示例
 pygame.init()
@@ -22,15 +26,13 @@ screen = pygame.display.set_mode(gui_config.WINDOW_SIZE)
 clock = pygame.time.Clock()
 
 # 我自己的变量
-test_block = BtnTestObject((512, 256, 64, 64), color=RED)
-test_block4 = ItemDestroyObject((256, 256, 72, 72), color=WHITE)
-test_block2 = DragTestObject((96, 20, 64, 64), color=BLUE)
-test_block3 = ItemSoltObject((96, 96, 64, 64), color=YELLOW, item_color=GREEN)
-test_block5 = ItemSoltObject((96, 192, 64, 64), color=YELLOW, item_color=MAGENTA)
-test_block6 = ItemSoltObject((96, 288, 64, 64), color=YELLOW, item_color=CYAN)
+res1 = TestRes1()
+res2 = TestRes2()
+inv = Inventory(res1, res2)
+inv_mgr = InventoryManager((20, 20, 256, 256), inv)
 
 ui = UIManager()
-ui.add(test_block, test_block2, test_block3, test_block4, test_block5, test_block6)
+ui.add(inv_mgr)
 
 print(ui.query(DraggableObject))  # 测试query功能
 # 我都变量定义结束
@@ -47,6 +49,7 @@ while running:
 
     # ==== 逻辑更新 ====
     ui.update()
+    print(ui._frames[ui._current_frame])
 
     # ==== 绘制部分 ====
     screen.fill(BLACK)

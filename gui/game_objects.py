@@ -10,6 +10,61 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     # 可能有一些耦合度问题
     from gui.ui_mgr import UIManager
+    from core.resources.resource import Resource
+    from core.resources.inventory import Inventory
+
+
+class InventoryManager(PgObject):
+    def __init__(self, rect, inv: Inventory):
+        super().__init__(rect, color=WHITE)
+        self.inv = inv
+        self.item_slot_rect = (96, 96, 64, 64)
+        self.item_slots = {type(res): ItemSlotObject(self.item_slot_rect, res) for res in inv.list()}
+
+    def on_create(self, manager: UIManager):
+        for item_slot in self.item_slots.values():
+            manager.add(item_slot)
+
+    def _handle_event(self, event, manager):
+        pass
+
+    def _update(self, manager):
+        self.inv.check_num()
+        if set(self.inv.keys()) != set(self.item_slots.keys()):
+            for item_slot in self.item_slots.values():
+                manager.remove(item_slot)
+            self.item_slots = {type(res): ItemSlotObject(self.item_slot_rect, res) for res in self.inv.list()}
+            for item_slot in self.item_slots.values():
+                manager.add(item_slot)
+
+        # print(self.item_slots)
+
+    # AI 代码
+    def _draw(self, surface, manager):
+        start_x = self.rect.left  # 从容器左边界开始
+        start_y = self.rect.top  # 从容器上边界开始
+        col = 0
+        row = 0
+
+        for item_slot in self.item_slots.values():
+            # 计算当前预估宽度
+            total_width = (item_slot.rect.width + 20) * (col + 1) - 20
+
+            # 换行判断（包含间隔的总宽度是否超出容器）
+            if total_width > self.rect.width:
+                row += 1
+                col = 0
+
+            # 计算实际坐标
+            x = start_x + col * (item_slot.rect.width + 20)
+            y = start_y + row * (item_slot.rect.height + 20)
+
+            # 更新位置
+            item_slot.rect.topleft = (x, y)
+            item_slot.draw(surface, manager)
+
+            col += 1
+
 
 
 class ItemObject(DraggableObject):
@@ -31,23 +86,35 @@ class ItemObject(DraggableObject):
         super()._draw(surface, manager)
 
 
-class ItemSoltObject(DraggableObject):
-    def __init__(self, rect, item_color: tuple[int, int, int] = RED, *, color=BLACK):
+class ItemSlotObject(DraggableObject):
+    """
+    单个物品的库存位
+    可以用于展示物品或者从中拖拽出物品实例
+    """
+    def __init__(self, rect, item: Resource, *, color=WHITE):
         super().__init__(rect, color=color)
 
-        self.item_color = item_color
-        self.tooltip = ToolTipObject('物品', '描述第一行\n描述第二行\n第三行\n我去这第四行这么长', color=WHITE)
+        self.item = item
+        self.tooltip = ToolTipObject(self.item.name, self.item.description, color=WHITE)
+        print(self.tooltip)
 
-        self._takeable = False
+        self._font_size = 24
+        self.font = pygame.font.SysFont("microsoftyahei", self._font_size)
+
+        self._takeable = True
 
     def on_create(self, manager: UIManager):
         manager.add(self.tooltip)
 
+    def on_remove(self, manager: UIManager):
+        manager.remove(self.tooltip)
+
     def _on_drag_start(self, manager: UIManager) -> None:
         if self._takeable:
-            take_out_item = ItemObject((0, 0, 48, 48), color=self.item_color)
+            take_out_item = ItemObject((0, 0, 48, 48), color=CYAN)
             take_out_item.holding = True
             manager.add(take_out_item)
+            self.item.num -= 1
             print(f'从 {self.color} 获取了 {take_out_item.color}')
 
     def _on_drag_end(self, manager: UIManager) -> None:
@@ -61,6 +128,14 @@ class ItemSoltObject(DraggableObject):
 
     def _draw(self, surface, manager):
         super()._draw(surface, manager)
+        font_s = self.font.render(str(self.item.num), True, BLACK)
+        font_rect = font_s.get_rect()
+        font_rect.bottomleft = self.rect.bottomleft
+        surface.blit(font_s, font_rect)
+        font_s = self.font.render(str(self.item.name), True, BLACK)
+        font_rect = font_s.get_rect()
+        font_rect.topleft = self.rect.topleft
+        surface.blit(font_s, font_rect)
 
 
 class ItemDestroyObject(PgObject):
@@ -100,6 +175,9 @@ class ToolTipObject(PgObject):
 
         self.z_index = ZIndex.tooltip
         self.visible = False
+
+    def on_remove(self, manager: UIManager):
+        print(self.title)
 
     def _handle_event(self, event, manager):
         pass
