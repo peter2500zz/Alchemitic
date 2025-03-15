@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 
 class InventoryManager(PgObject):
     def __init__(self, rect, inv: Inventory):
-        super().__init__(rect, color=WHITE)
+        super().__init__(rect, color=GREY)
         self.inv = inv
         self.item_slot_rect = (96, 96, 64, 64)
         self.item_slots = {type(res): ItemSlotObject(self.item_slot_rect, res) for res in inv.list()}
@@ -24,9 +24,6 @@ class InventoryManager(PgObject):
     def on_create(self, manager: UIManager):
         for item_slot in self.item_slots.values():
             manager.add(item_slot)
-
-    def _handle_event(self, event, manager):
-        pass
 
     def _update(self, manager):
         self.inv.check_num()
@@ -41,6 +38,7 @@ class InventoryManager(PgObject):
 
     # AI 代码
     def _draw(self, surface, manager):
+        super()._draw(surface, manager)
         start_x = self.rect.left  # 从容器左边界开始
         start_y = self.rect.top  # 从容器上边界开始
         col = 0
@@ -66,24 +64,11 @@ class InventoryManager(PgObject):
             col += 1
 
 
-
 class ItemObject(DraggableObject):
-    def __init__(self, rect, *, color=BLACK, name="unknown"):
+    def __init__(self, rect, item: Resource, *, color=BLACK):
         super().__init__(rect, color=color)
 
-        self.name = name
-
-    def _on_drag_start(self, manager: UIManager) -> None:
-        pass
-
-    def _on_drag_end(self, manager: UIManager) -> None:
-        pass
-
-    def _update(self, manager):
-        super()._update(manager)
-
-    def _draw(self, surface, manager):
-        super()._draw(surface, manager)
+        self.item = item
 
 
 class ItemSlotObject(DraggableObject):
@@ -112,14 +97,25 @@ class ItemSlotObject(DraggableObject):
 
     def _on_drag_start(self, manager: UIManager) -> None:
         if self._takeable:
-            take_out_item = ItemObject((0, 0, 48, 48), color=CYAN)
+            take_out_item = ItemObject((0, 0, 48, 48), type(self.item)(1), color=CYAN)
             take_out_item.holding = True
             manager.add(take_out_item)
             self._num -= 1
             print(f'从 {self.color} 获取了 {take_out_item.color}')
 
     def _on_drag_end(self, manager: UIManager) -> None:
-        self.item.num -= 1
+        # todo! 应该设置为在背包范围内都能放回去
+        # todo! 话又说回来了，我觉得应该加一个滚轮来应对物品很多的情况，其他例如文本在超出self.rect时候也可以用这个滚轮，mixin？遮罩？
+
+        if self.rect.collidepoint(pygame.mouse.get_pos()):
+            items: list[ItemObject] = list(reversed(manager.query(ItemObject)))
+            for item_obj in items:
+                if isinstance(item_obj.item, type(self.item)) and self.rect.collidepoint(item_obj.rect.center):
+                    manager.remove(item_obj)
+                    break
+            self._num += 1
+        else:
+            self.item.num -= 1
 
     def _update(self, manager):
         if self.rect.collidepoint(pygame.mouse.get_pos()):
@@ -162,9 +158,6 @@ class ItemDestroyObject(PgObject):
         self.mix_color = self.mix_color[-5:]
         self.color = blend_colors(self.mix_color)
 
-    def _draw(self, surface, manager):
-        super()._draw(surface, manager)
-
 
 class ToolTipObject(PgObject):
     def __init__(self, title: str = '标题',desc: str = '描述', *, color=BLACK):
@@ -176,15 +169,6 @@ class ToolTipObject(PgObject):
 
         self.z_index = ZIndex.tooltip
         self.visible = False
-
-    def on_remove(self, manager: UIManager):
-        print(self.title)
-
-    def _handle_event(self, event, manager):
-        pass
-
-    def _update(self, manager):
-        pass
 
     def _draw(self, surface, manager):
         title = self.font.render(self.title, True, RED)
