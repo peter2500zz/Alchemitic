@@ -2,6 +2,7 @@ from copy import deepcopy
 
 from core.resources.resource_error import *
 from core.resources.resource import Resource
+from core.recipes.recipe import Recipe
 
 
 class Inventory:
@@ -96,21 +97,23 @@ class Inventory:
             if resource.num <= 0:
                 self.remove(resource)
 
-    def include(self, other) -> bool:
+    def include(self, *others) -> bool:
         """
         我比他多，对的对的。我没他多，错的错的。一样多？对喽！
 
-        :param other: 可以是 Inventory 或者 Resource，如果是 Inventory 则会比较每一项
+        :param others: 可以是 Inventory 或者 Resource，如果是 Inventory 则会比较每一项
         :return: other 是否是自身的子集
         """
-        if not isinstance(other, (Inventory, Resource)):
-            return NotImplemented
 
         resources = []
-        if isinstance(other, Inventory):
-            resources = [*other.list()]
-        elif isinstance(other, Resource):
-            resources = [other]
+        for other in others:
+            if not isinstance(other, (Inventory, Resource)):
+                raise TypeError(other)
+
+            if isinstance(other, Inventory):
+                resources.extend(other.list())
+            elif isinstance(other, Resource):
+                resources.append(other)
 
         for resource in resources:
             res_type = type(resource)
@@ -129,6 +132,10 @@ class Inventory:
     def __ne__(self, other):
         eq_result = self.__eq__(other)
         return NotImplemented if eq_result is NotImplemented else not eq_result
+
+    def create(self, recipe: Recipe):
+        self.remove(*recipe.requires)
+        self.add(*recipe.provides)
 
 
 if __name__ == '__main__':

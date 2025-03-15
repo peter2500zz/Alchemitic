@@ -6,3 +6,12 @@ class Resource(object):
         self.description = 'unknown'
         self.type = 'unknown'
         self.num: int = num  # 当前物品数量
+
+
+class Aspect(Resource):
+    pass
+
+
+class Item(Resource):
+    pass
+
