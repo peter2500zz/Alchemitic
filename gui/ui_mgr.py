@@ -12,11 +12,12 @@ class UIManager:
     用于统一管理obj的类
     todo? 也许之后要改个名字？ 或者设置一个父类来分别 manage 物体和 UI？
     """
-    def __init__(self):
+    def __init__(self, clock: pygame.time.Clock):
         self._frames: dict[str, list[PgObject]] = {
             'main': []
         }
         self._current_frame = 'main'
+        self.clock = clock
 
     def add(self, *objs: PgObject, frame: str = 'main'):
         for obj in objs:

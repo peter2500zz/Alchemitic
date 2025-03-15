@@ -20,6 +20,24 @@ class TestRes2(Resource):
         self.description = '叮\n咚鸡\n叮咚鸡'
 
 
+class DebugInfo(TextObject):
+    def __init__(self):
+        self.text = ""
+        super().__init__(self.text, reverse_v=True)
+
+    def _on_create(self, manager: UIManager):
+        self.rect.bottomleft = (0, WINDOW_SIZE[1])
+
+    def _update(self, manager: UIManager) -> None:
+        text = [
+            f'objects: {len(manager._frames[manager._current_frame])}',
+            f'inv: {[{res.name: res.num for res in inv.inv.list()} for inv in manager.query(InventoryManager)]}',
+            f'mouse_pos: {pygame.mouse.get_pos()}',
+            f'fps: {manager.clock.get_fps():.2f}',
+        ]
+        self.text = '\n'.join(text)
+
+
 # 初始化及使用示例
 pygame.init()
 screen = pygame.display.set_mode(gui_config.WINDOW_SIZE)
@@ -30,9 +48,9 @@ res1 = TestRes1()
 res2 = TestRes2()
 inv = Inventory(res1, res2)
 inv_mgr = InventoryManager((20, 20, 256, 256), inv)
-
-ui = UIManager()
-ui.add(inv_mgr)
+debug_info = DebugInfo()
+ui = UIManager(clock)
+ui.add(inv_mgr, debug_info)
 
 print(ui.query(DraggableObject))  # 测试query功能
 # 我都变量定义结束
@@ -49,7 +67,6 @@ while running:
 
     # ==== 逻辑更新 ====
     ui.update()
-    print(ui._frames[ui._current_frame])
 
     # ==== 绘制部分 ====
     screen.fill(BLACK)

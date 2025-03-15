@@ -85,7 +85,7 @@ class Inventory:
                 resource_list.sort(key=lambda x: x.num)
                 resource_list = list(reversed(resource_list))
 
-        print([(x.__class__.__name__, x.num) for x in resource_list])
+        # print([(x.__class__.__name__, x.num) for x in resource_list])
         return resource_list
 
     def keys(self):

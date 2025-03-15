@@ -1,9 +1,8 @@
 from __future__ import annotations
-from abc import ABC, abstractmethod
 import pygame
 
 from gui.colors import *
-from gui.config import ZIndex
+from gui.config import ZIndex, WINDOW_SIZE
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -11,10 +10,10 @@ if TYPE_CHECKING:
     from gui.ui_mgr import UIManager
 
 
-class PgObject(ABC):
+class PgObject(object):
     """
     此抽象基类定义了所有游戏内object
-    所有物体在主循环的每一帧都会调用:
+    所有物体在主循环的每一帧都会调用
         handle_event()
         update()
         draw()
@@ -28,9 +27,21 @@ class PgObject(ABC):
         self.z_index = ZIndex.objects
 
     def on_create(self, manager: UIManager):
+        return self._on_create(manager)
+
+    def _on_create(self, manager: UIManager):
+        """
+        在实例创建时调用此方法
+        """
         pass
 
     def on_remove(self, manager: UIManager):
+        return self._on_remove(manager)
+
+    def _on_remove(self, manager: UIManager):
+        """
+        在实例销毁时调用此方法
+        """
         pass
 
     def handle_event(self, event: pygame.event.Event, manager: UIManager) -> bool:
@@ -46,14 +57,9 @@ class PgObject(ABC):
             return False
         return self._handle_event(event, manager)
 
-    @abstractmethod
     def _handle_event(self, event: pygame.event.Event, manager: UIManager) -> bool | bool:
         """
-        不与handle_event合并是因为希望省略一些重复的判断代码，这样子类只需要专注处理自己的逻辑
-
-        :param event: 游戏事件
-        :param manager: UIManager实例，用于查询或者操作其他obj
-        :return: 如果为真则会消费此事件，其他obj无法继续响应
+        游戏窗口接收到输入时调用此方法
         """
         pass
 
@@ -66,8 +72,10 @@ class PgObject(ABC):
             return
         return self._update(manager)
 
-    @abstractmethod
     def _update(self, manager: UIManager) -> None:
+        """
+        游戏更新时调用此方法
+        """
         pass
 
     def draw(self, surface: pygame.Surface, manager: UIManager) -> None:
@@ -78,8 +86,10 @@ class PgObject(ABC):
             return
         return self._draw(surface, manager)
 
-    @abstractmethod
     def _draw(self, surface: pygame.Surface, manager: UIManager) -> None:
+        """
+        游戏刷新画面时调用此方法
+        """
         pygame.draw.rect(surface, self.color, self.rect)
 
 
@@ -123,14 +133,13 @@ class DraggableObject(PgObject):
                 self.holding = False
                 self._on_drag_end(manager)
 
-    @abstractmethod
     def _on_drag_start(self, manager: UIManager) -> None:
         """
         在开始拖拽时触发
         """
         pass
 
-    @abstractmethod
+
     def _on_drag_end(self, manager: UIManager) -> None:
         """
         在结束拖拽时触发
@@ -148,9 +157,6 @@ class DraggableObject(PgObject):
                 mouse_pos[0] - self._mouse_offset[0],
                 mouse_pos[1] - self._mouse_offset[1]
             )
-
-    def _draw(self, surface: pygame.Surface, manager: UIManager) -> None:
-        super()._draw(surface, manager)
 
 
 class BtnObject(PgObject):
@@ -179,17 +185,42 @@ class BtnObject(PgObject):
                     # 如果在自身范围内释放则调用 _on_clicked
                     self._on_clicked(manager)
 
-    @abstractmethod
     def _on_clicked(self, manager: UIManager) -> None:
         """
         当按下时触发
         按下的定义在 _handle_event 里
         """
         pass
-    
-    def _update(self, manager):
-        pass
+
+
+class TextObject(PgObject):
+    def __init__(self, text: str, font_size: int = 14, rect=(0, 0, *WINDOW_SIZE), reverse_v=False, reverse_h=False):
+        super().__init__(rect)
+
+        self.text = text
+        self.font = pygame.font.SysFont("microsoftyahei", font_size)
+
+        self.reverse_v = reverse_v
+        self.reverse_h = reverse_h
 
     def _draw(self, surface: pygame.Surface, manager: UIManager) -> None:
-        super()._draw(surface, manager)
+        split_text = self.text.split('\n')
+        offset_y = 0
+        for text in split_text:
+            text = self.font.render(text, True, WHITE)
+            text_rect = text.get_rect()
+
+            if self.reverse_v:
+                text_rect.bottom = self.rect.bottom
+                text_rect.y -= offset_y
+            else:
+                text_rect.top = self.rect.top
+                text_rect.y += offset_y
+            if self.reverse_h:
+                text_rect.right = self.rect.right
+            else:
+                text_rect.left = self.rect.left
+
+            surface.blit(text, text_rect)
+            offset_y += text_rect.height
 
