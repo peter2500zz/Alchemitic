@@ -13,5 +13,9 @@ class Aspect(Resource):
 
 
 class Item(Resource):
-    pass
+    aspects: list[Aspect]
+
+    def __init__(self, num: int = 1):
+        super().__init__(num)
+
 

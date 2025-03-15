@@ -51,9 +51,9 @@ class Inventory:
                 elif self._inventory[type(resource)].num - resource.num == 0 or just_do_it:
                     self._inventory.pop(type(resource))  # 等于 0 或者启用了 just_do_it 则移除这一项
                 else:  # 小于 0 且未启用 just_do_it
-                    raise ResourceBelowZeroError(resource)
+                    raise ResourceNotEnoughError(resource)
             elif not just_do_it:  # 根本就不存在又没启用 just_do_it
-                raise ResourceBelowZeroError(resource)
+                raise ResourceNotEnoughError(resource)
             # else 不做任何处理因为本就不存在无需移除
 
     def __sub__(self, other):
@@ -135,7 +135,12 @@ class Inventory:
 
     def create(self, recipe: Recipe):
         self.remove(*recipe.requires)
-        self.add(*recipe.provides)
+        return recipe.provides
+
+    def take_out(self, *resources: Resource):
+        self.remove(*resources)
+        return resources
+
 
 
 if __name__ == '__main__':
