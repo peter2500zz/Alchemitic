@@ -44,7 +44,7 @@ standard_normal_recipes = {
 }
 
 standard_alchemy_recipes = {
-    # ==== 要素部分 ====
+    # ==== 要素部分 ==== 注意 tier temp_range base 哦
     '寒冰': AlchemyRecipe([Aqua(1), Ordo(1)], [Gelum(1)]),
     '光明': AlchemyRecipe([Aer(1), Ignis(1)], [Lux(1)]),
     '运动': AlchemyRecipe([Aer(1), Aqua(1)], [Motus(1)]),
