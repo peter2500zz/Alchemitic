@@ -20,16 +20,22 @@ class Crucible:
         return results
 
     def dealch(self):
+        """
+        分解锅里的物品为要素
+        """
         for resource in self._inv.export():
-            if isinstance(resource, Item):
-                self._inv.add(*resource.aspects)
-                self._inv.remove(resource)
+            if isinstance(resource, Item):  # 如果是物品才进行分解
+                for _ in range(resource.num):
+                    # 添加 n = 物品数量 次要素
+                    self._inv.add(*resource.aspects)
+                self._inv.remove(resource)  # 把物品从锅里去掉
 
     def reaction(self) -> list[Item]:
         """
-        坩埚的合成与背包合成不同，应该每隔一段时间调用一次判定
+        坩埚的合成与背包合成不同
         会自动判断锅内可以合成的配方，由配方的tier排序
-        如果
+
+        :return: 包含结果物品的列表。反应产生的要素会自动添加到锅里
         """
         recipes: list[AlchemyRecipe] = sorted(self._recipes.values(), key=lambda x: x.tier, reverse=True)
         results = []  # 存储结果的列表
@@ -74,7 +80,7 @@ if __name__ == '__main__':
 
     alch_recipes = {
         'Lux': AlchemyRecipe([Ignis(1), Aer(1)], [Lux(1)]),
-        'lantern': AlchemyRecipe([Candle(1), Lux(1)], [Lantern(1)])
+        'lantern': AlchemyRecipe([Ignis(1), Lux(1)], [Lantern(1)])
     }
 
     pot = Crucible(alch_recipes)
