@@ -1,6 +1,8 @@
+from core.resources.config import *
 
 
 class Resource(object):
+    category = ResourceCategory.Undefined
     def __init__(self, num: int = 1):
         self.name = 'unknown'
         self.description = 'unknown'
@@ -9,10 +11,11 @@ class Resource(object):
 
 
 class Aspect(Resource):
-    pass
+    category = ResourceCategory.Aspect
 
 
 class Item(Resource):
+    category = ResourceCategory.Item
     aspects: list[Aspect]
 
     def __init__(self, num: int = 1):

@@ -10,6 +10,9 @@ class Recipe:
 
 
 class NormalRecipe(Recipe):
+    """
+    标准配方类，可直接合成
+    """
     def __init__(self, requires: list[Resource], provides: list[Resource]):
         has_asp = []
         for provide in provides:
@@ -22,6 +25,9 @@ class NormalRecipe(Recipe):
 
 
 class AlchemyRecipe(Recipe):
+    """
+    炼金配方类，需要坩埚
+    """
     def __init__(self, requires: list[Resource], provides: list[Resource], tier: int = 1, *, temp_range: tuple[int, int] | None = None, base: CrucibleBase = None):
         super().__init__(requires, provides)
         self.temp_range = temp_range
@@ -48,9 +54,9 @@ if __name__ == '__main__':
 
     inv = Inventory(Lingangu(1), Doggo(3))
 
-    print(inv.list())
+    print(inv.export())
     for recipe in test_recipe.values():
         if inv.include(*recipe.requires):
             result = inv.create(recipe)
             inv.add(*result)
-            print(inv.list())
+            print(inv.export())

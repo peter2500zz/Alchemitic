@@ -69,7 +69,7 @@ class Inventory:
 
         return new_inventory
 
-    def list(self, order: str = '') -> list[Resource]:
+    def export(self, order: str = '') -> list[Resource]:
         """
         返回由自身库存组成的列表
 
@@ -81,7 +81,7 @@ class Inventory:
             case 'name':
                 pass  # todo! 按照名字排序
             case 'type':
-                pass  # todo! 按照种类排序
+                resource_list.sort(key=lambda resource: resource.category.value)
             case 'num':
                 resource_list.sort(key=lambda x: x.num)
                 resource_list = list(reversed(resource_list))
@@ -111,7 +111,7 @@ class Inventory:
                 raise TypeError(other)
 
             if isinstance(other, Inventory):
-                resources.extend(other.list())
+                resources.extend(other.export())
             elif isinstance(other, Resource):
                 resources.append(other)
 
@@ -133,7 +133,13 @@ class Inventory:
         eq_result = self.__eq__(other)
         return NotImplemented if eq_result is NotImplemented else not eq_result
 
-    def create(self, recipe: Recipe):
+    def create(self, recipe: Recipe) -> list[Resource]:
+        """
+        通过传入的配方制作。不检测配方条件是否满足
+
+        :param recipe: 传入的配方
+        :return: 返回由合成结果组成的列表
+        """
         self.remove(*recipe.requires)
         return recipe.provides
 
@@ -156,5 +162,5 @@ if __name__ == '__main__':
 
     inv1 = Inventory(res1, res2)
     inv2 = Inventory(res3, res2)
-    print([(x.__class__.__name__, x.num) for x in inv1.list('num')])
+    print([(x.__class__.__name__, x.num) for x in inv1.export('num')])
 

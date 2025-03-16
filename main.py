@@ -31,7 +31,7 @@ class DebugInfo(TextObject):
     def _update(self, manager: UIManager) -> None:
         text = [
             f'objects: {len(manager._frames[manager._current_frame])}',
-            f'inv: {[{res.name: res.num for res in inv.inv.list()} for inv in manager.query(InventoryManager)]}',
+            f'inv: {[{res.name: res.num for res in inv.inv.export()} for inv in manager.query(InventoryManager)]}',
             f'mouse_pos: {pygame.mouse.get_pos()}',
             f'fps: {manager.clock.get_fps():.2f}',
         ]

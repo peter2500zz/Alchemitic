@@ -19,7 +19,7 @@ class InventoryManager(PgObject):
         super().__init__(rect, color=GREY)
         self.inv = inv
         self.item_slot_rect = (96, 96, 64, 64)
-        self.item_slots = {type(res): ItemSlotObject(self.item_slot_rect, res) for res in inv.list()}
+        self.item_slots = {type(res): ItemSlotObject(self.item_slot_rect, res) for res in inv.export()}
 
     def on_create(self, manager: UIManager):
         for item_slot in self.item_slots.values():
@@ -30,7 +30,7 @@ class InventoryManager(PgObject):
         if set(self.inv.keys()) != set(self.item_slots.keys()):
             for item_slot in self.item_slots.values():
                 manager.remove(item_slot)
-            self.item_slots = {type(res): ItemSlotObject(self.item_slot_rect, res) for res in self.inv.list()}
+            self.item_slots = {type(res): ItemSlotObject(self.item_slot_rect, res) for res in self.inv.export()}
             for item_slot in self.item_slots.values():
                 manager.add(item_slot)
 
