@@ -44,12 +44,15 @@ standard_normal_recipes = {
 }
 
 standard_alchemy_recipes = {
+    # ==== 要素部分 ====
     '寒冰': AlchemyRecipe([Aqua(1), Ordo(1)], [Gelum(1)]),
     '光明': AlchemyRecipe([Aer(1), Ignis(1)], [Lux(1)]),
     '运动': AlchemyRecipe([Aer(1), Aqua(1)], [Motus(1)]),
     '能量': AlchemyRecipe([Ignis(1), Ordo(1)], [Potentia(1)]),
     '虚空': AlchemyRecipe([Aer(1), Perditio(1)], [Vacuos(1)]),
     '生命': AlchemyRecipe([Aqua(1), Terra(1)], [Victus(1)]),
+
+    # ==== 物品部分 ====
 }
 
 

@@ -6,7 +6,7 @@ from core.resources.resource import *
 
 class Crucible:
     def __init__(self, recipes: dict[str, AlchemyRecipe]):
-        self._inv = Inventory()
+        self.inventory = Inventory()
         self.temperature = 24
         self.base = CrucibleBase.water
         self._recipes = recipes
@@ -15,20 +15,27 @@ class Crucible:
         results = []
         for resource in resources:
             # 不管是要素还是物品先直接加到锅里再说
-            self._inv.add(resource)
+            self.inventory.add(resource)
             # results.extend(self.create())
         return results
 
-    def dealch(self):
+    def dealch(self) -> bool:
         """
         分解锅里的物品为要素
+
+        :return: 是否有元素被分解
         """
-        for resource in self._inv.export():
+        de_ed = False
+        for resource in self.inventory.export():
             if isinstance(resource, Item):  # 如果是物品才进行分解
                 for _ in range(resource.num):
                     # 添加 n = 物品数量 次要素
-                    self._inv.add(*resource.aspects)
-                self._inv.remove(resource)  # 把物品从锅里去掉
+                    self.inventory.add(*resource.aspects)
+                self.inventory.remove(resource)  # 把物品从锅里去掉
+                de_ed = True
+
+        return de_ed
+
 
     def reaction(self) -> list[Item]:
         """
@@ -49,10 +56,10 @@ class Crucible:
                 if self.base.value != recipe.base.value:
                     continue
 
-            while self._inv.include(*recipe.requires):  # 判断是否满足配方条件
-                for result in self._inv.create(recipe):
+            while self.inventory.include(*recipe.requires):  # 判断是否满足配方条件
+                for result in self.inventory.create(recipe):
                     if isinstance(result, Aspect):
-                        self._inv.add(result)
+                        self.inventory.add(result)
                     elif isinstance(result, Item):
                         results.append(result)
 
@@ -115,4 +122,4 @@ if __name__ == '__main__':
 
             case 3:
                 pot.dealch()
-        print(f'锅里有 {", ".join([f"{res.__class__.__name__}: {res.num}" for res in pot._inv.export()])}')
+        print(f'锅里有 {", ".join([f"{res.__class__.__name__}: {res.num}" for res in pot.inventory.export()])}')
