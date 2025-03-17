@@ -90,9 +90,15 @@ class Inventory:
         return resource_list
 
     def keys(self):
+        """
+        返回包含的所有物品类
+        """
         return self._inventory.keys()
 
     def check_num(self):
+        """
+        清除背包内小于等于0的物品
+        """
         for resource in self._inventory.copy().values():
             if resource.num <= 0:
                 self.remove(resource)

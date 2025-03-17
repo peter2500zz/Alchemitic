@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import pygame
-
 from gui.base_objects import *
 from gui import config as gui_config
 from gui.config import ZIndex
@@ -15,29 +13,54 @@ if TYPE_CHECKING:
 
 
 class InventoryManager(PgObject):
+    """
+    背包模块
+    """
     def __init__(self, rect, inv: Inventory):
         super().__init__(rect, color=GREY)
         self.inv = inv
-        self.item_slot_rect = (96, 96, 64, 64)
+        self.item_slot_rect = (96, 96, 64, 64)  # 背包的大小
+        #  背包的所有槽位，根据自己的物品栏设定，物品栏必然是动态的
         self.item_slots = {type(res): ItemSlotObject(self.item_slot_rect, res) for res in inv.export()}
 
     def on_create(self, manager: UIManager):
+        #  当自身被创建的时候将所有物品槽位加入管理器，初始化
         for item_slot in self.item_slots.values():
             manager.add(item_slot)
 
+    def _handle_event(self, event: pygame.event.Event, manager: UIManager) -> bool:
+        if event.type == pygame.MOUSEBUTTONUP:
+            #  当鼠标左键抬起的时
+            if event.button == 1:
+                #  查询所有被拿出来的实体
+                for item_obj in manager.query(ItemObject):
+                    #  如果中心与自身相交
+                    if self.rect.collidepoint(item_obj.rect.center):
+                        #  自身物品槽位的显示数量添加
+                        for item_slot in self.item_slots.values():
+                            if type(item_slot.item) == type(item_obj.item):
+                                item_slot.num += item_obj.item.num
+                        #  自身物品栏添加（相当于放回去）
+                        self.inv.add(item_obj.item)
+                        manager.remove(item_obj)
+        return False
+
     def _update(self, manager):
-        self.inv.check_num()
+        self.inv.check_num()  # 检查有没有无效物品
+        # 如果物品种类变化
         if set(self.inv.keys()) != set(self.item_slots.keys()):
+            # 先移除已经实例化的物品槽
             for item_slot in self.item_slots.values():
                 manager.remove(item_slot)
+            # 重新初始化新的物品槽
             self.item_slots = {type(res): ItemSlotObject(self.item_slot_rect, res) for res in self.inv.export()}
             for item_slot in self.item_slots.values():
                 manager.add(item_slot)
 
-        # print(self.item_slots)
-
-    # AI 代码
     def _draw(self, surface, manager):
+        """
+        AI 代码 绘制物品槽位
+        """
         super()._draw(surface, manager)
         start_x = self.rect.left  # 从容器左边界开始
         start_y = self.rect.top  # 从容器上边界开始
@@ -65,6 +88,9 @@ class InventoryManager(PgObject):
 
 
 class ItemObject(DraggableObject):
+    """
+    被拿出来的物品
+    """
     def __init__(self, rect, item: Resource, *, color=BLACK):
         super().__init__(rect, color=color)
 
@@ -79,8 +105,8 @@ class ItemSlotObject(DraggableObject):
     def __init__(self, rect, item: Resource, *, color=WHITE):
         super().__init__(rect, color=color)
 
-        self.item = item
-        self._num = item.num
+        self.item: Resource = item
+        self.num = item.num
         self.tooltip = ToolTipObject(self.item.name, self.item.description, color=WHITE)
         print(self.tooltip)
 
@@ -88,6 +114,7 @@ class ItemSlotObject(DraggableObject):
         self.font = pygame.font.SysFont("microsoftyahei", self._font_size)
 
         self._takeable = True
+        self._take_out_num = 1  # 除非调试不然不要改这个！！！
 
     def on_create(self, manager: UIManager):
         manager.add(self.tooltip)
@@ -97,25 +124,19 @@ class ItemSlotObject(DraggableObject):
 
     def _on_drag_start(self, manager: UIManager) -> None:
         if self._takeable:
-            take_out_item = ItemObject((0, 0, 48, 48), type(self.item)(1), color=CYAN)
+            take_out_item = ItemObject((0, 0, 48, 48), type(self.item)(self._take_out_num), color=CYAN)
             take_out_item.holding = True
             manager.add(take_out_item)
-            self._num -= 1
+            self.num -= self._take_out_num
             print(f'从 {self.color} 获取了 {take_out_item.color}')
 
     def _on_drag_end(self, manager: UIManager) -> None:
-        # todo! 应该设置为在背包范围内都能放回去
         # todo! 话又说回来了，我觉得应该加一个滚轮来应对物品很多的情况，其他例如文本在超出self.rect时候也可以用这个滚轮，mixin？遮罩？
 
-        if self.rect.collidepoint(pygame.mouse.get_pos()):
-            items: list[ItemObject] = list(reversed(manager.query(ItemObject)))
-            for item_obj in items:
-                if isinstance(item_obj.item, type(self.item)) and self.rect.collidepoint(item_obj.rect.center):
-                    manager.remove(item_obj)
-                    break
-            self._num += 1
+        if self.item.num - self._take_out_num >= 0:
+            self.item.num -= self._take_out_num
         else:
-            self.item.num -= 1
+            raise ValueError("物品数量不足")
 
     def _update(self, manager):
         if self.rect.collidepoint(pygame.mouse.get_pos()):
@@ -125,7 +146,7 @@ class ItemSlotObject(DraggableObject):
 
     def _draw(self, surface, manager):
         super()._draw(surface, manager)
-        font_s = self.font.render(str(self._num), True, BLACK)
+        font_s = self.font.render(str(self.num), True, BLACK)
         font_rect = font_s.get_rect()
         font_rect.bottomleft = self.rect.bottomleft
         surface.blit(font_s, font_rect)
@@ -197,8 +218,11 @@ class ToolTipObject(PgObject):
             text_offset += text_rect.height
 
 
-# AI 代码
+
 def blend_colors(rgb_list):
+    """
+    AI 代码 每次调用时候偏移RGB
+    """
     if not rgb_list:
         raise ValueError("输入的RGB列表不能为空")
 

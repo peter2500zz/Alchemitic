@@ -57,7 +57,7 @@ class PgObject(object):
             return False
         return self._handle_event(event, manager)
 
-    def _handle_event(self, event: pygame.event.Event, manager: UIManager) -> bool | bool:
+    def _handle_event(self, event: pygame.event.Event, manager: UIManager) -> bool:
         """
         游戏窗口接收到输入时调用此方法
         """

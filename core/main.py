@@ -48,109 +48,110 @@ for item in standard_items:  # 遍历所有注册的物品
             if show_debug_info: print(e)
 
 
-items = standard_items
-inv = Inventory(Stone(2))
-pot = Crucible(standard_alchemy_recipes)
+if __name__ == '__main__':
+    items = standard_items
+    inv = Inventory(Stone(2))
+    pot = Crucible(standard_alchemy_recipes)
 
 
-# 嵌套地狱 仅作概念性游戏用
-while choose := input(f'\n请选择要进行的操作:\n1. 打开背包\n2. 走向锅\n3. (debug)向背包里添加物品\n0/回车. 结束\n'):
-    try: choose = int(choose)
-    except ValueError: choose = 0
+    # 嵌套地狱 仅作概念性游戏用
+    while choose := input(f'\n请选择要进行的操作:\n1. 打开背包\n2. 走向锅\n3. (debug)向背包里添加物品\n0/回车. 结束\n'):
+        try: choose = int(choose)
+        except ValueError: choose = 0
 
-    match choose:
-        case 1:  # 打开背包
-            while choose := input(f'\n请选择要进行的操作:\n1. 查看背包\n2. 合成物品\n3. 检查合成手册\n0/回车. 离开\n'):
-                try: choose = int(choose)
-                except ValueError: choose = 0
+        match choose:
+            case 1:  # 打开背包
+                while choose := input(f'\n请选择要进行的操作:\n1. 查看背包\n2. 合成物品\n3. 检查合成手册\n0/回车. 离开\n'):
+                    try: choose = int(choose)
+                    except ValueError: choose = 0
 
-                match choose:
-                    case 1:  # 查看背包
-                        print(f'\n你的背包里现在有:\n{"\n".join(f"{item.num}*{item.name}" for item in inv.export())}')
+                    match choose:
+                        case 1:  # 查看背包
+                            print(f'\n你的背包里现在有:\n{"\n".join(f"{item.num}*{item.name}" for item in inv.export())}')
 
-                    case 2:  # 合成物品
-                        can_create = []
-                        for recipe_name, recipe in standard_normal_recipes.items():  # 遍历标准配方
-                            if inv.include(*recipe.requires):  # 找出现在能制作的
-                                can_create.append({"name": recipe_name, "recipe": recipe})
+                        case 2:  # 合成物品
+                            can_create = []
+                            for recipe_name, recipe in standard_normal_recipes.items():  # 遍历标准配方
+                                if inv.include(*recipe.requires):  # 找出现在能制作的
+                                    can_create.append({"name": recipe_name, "recipe": recipe})
 
-                        if choose := input(f'\n你现在可以进行以下合成:\n{"\n".join(f"{index + 1}. {recipe['name']}: {' + '.join([f'{res.num}*{res.name}' for res in recipe['recipe'].requires])} = {', '.join([f'{res.num}*{res.name}' for res in recipe['recipe'].provides])}" for index, recipe in enumerate(can_create))}\n0. 不合成\n'):
-                            # todo! 制作n次功能
-                            try: choose = int(choose)
-                            except ValueError: choose = 0
-                            if choose > len(can_create): choose = 0
+                            if choose := input(f'\n你现在可以进行以下合成:\n{"\n".join(f"{index + 1}. {recipe['name']}: {' + '.join([f'{res.num}*{res.name}' for res in recipe['recipe'].requires])} = {', '.join([f'{res.num}*{res.name}' for res in recipe['recipe'].provides])}" for index, recipe in enumerate(can_create))}\n0. 不合成\n'):
+                                # todo! 制作n次功能
+                                try: choose = int(choose)
+                                except ValueError: choose = 0
+                                if choose > len(can_create): choose = 0
 
-                            if choose != 0:
-                                result = inv.create(can_create[choose - 1]['recipe'])
-                                inv.add(*result)
-                                print(f'\n你制作了:\n{", ".join([f"{result.num}*{result.name}" for result in result])}')
+                                if choose != 0:
+                                    result = inv.create(can_create[choose - 1]['recipe'])
+                                    inv.add(*result)
+                                    print(f'\n你制作了:\n{", ".join([f"{result.num}*{result.name}" for result in result])}')
 
-                    case 3:  # 检查合成手册
-                        print(f'你的书里记载了一些合成配方:\n{"\n".join([f"{recipe_name}: {' + '.join([f'{res.num}*{res.name}' for res in recipe.requires])} = {', '.join([f'{res.num}*{res.name}' for res in recipe.provides])}" for recipe_name, recipe in standard_normal_recipes.items()])}')
-                        input(f'按回车以继续...')
+                        case 3:  # 检查合成手册
+                            print(f'你的书里记载了一些合成配方:\n{"\n".join([f"{recipe_name}: {' + '.join([f'{res.num}*{res.name}' for res in recipe.requires])} = {', '.join([f'{res.num}*{res.name}' for res in recipe.provides])}" for recipe_name, recipe in standard_normal_recipes.items()])}')
+                            input(f'按回车以继续...')
 
-        case 2:  # 走向锅
-            while choose := input(f'\n请选择要进行的操作:\n1. 检查锅里的东西\n2. 往锅里扔东西\n3. 加热锅(分解锅里的物品)\n4. 搅拌锅(合成物品)\n5. 检查炼金手册\n0/回车. 离开\n'):
-                # todo! 加入从锅里把没反应的东西捞出来的功能
-                # todo! 改变温度 基底功能
-                try: choose = int(choose)
-                except ValueError: choose = 0
+            case 2:  # 走向锅
+                while choose := input(f'\n请选择要进行的操作:\n1. 检查锅里的东西\n2. 往锅里扔东西\n3. 加热锅(分解锅里的物品)\n4. 搅拌锅(合成物品)\n5. 检查炼金手册\n0/回车. 离开\n'):
+                    # todo! 加入从锅里把没反应的东西捞出来的功能
+                    # todo! 改变温度 基底功能
+                    try: choose = int(choose)
+                    except ValueError: choose = 0
 
-                match choose:
-                    case 1:  # 检查锅里的东西
-                        print(f'\n锅里现在有:\n{", ".join([f'{res.num}*{res.name}' for res in pot.inventory.export()])}')
+                    match choose:
+                        case 1:  # 检查锅里的东西
+                            print(f'\n锅里现在有:\n{", ".join([f'{res.num}*{res.name}' for res in pot.inventory.export()])}')
 
-                    case 2:  # 往锅里扔东西
-                        inv_list = inv.export()
-                        while choose := input(f'\n选择要扔到锅里的东西:\n{"\n".join(f"{index + 1}. {item.name}" for index, item in enumerate(inv_list))}\n0. 取消\n'):
-                            try: choose = int(choose)
-                            except ValueError: choose = 0
-                            if choose > len(inv_list): choose = 0
-
-                            if choose != 0:
-                                num = input(f'要添加的数量(1, 最大 {inv_list[choose - 1].num}): ')
-                                try: num = int(num)
-                                except ValueError: num = 1
-
-                                if 1 <= num <= inv_list[choose - 1].num:
-                                    pot.add(*inv.take_out(type(inv_list[choose - 1])(num)))
-                                    print(f'你往锅里加了 {num}*{type(inv_list[choose - 1]).name}')
-                                elif num >= inv_list[choose - 1].num:
-                                    print(f'你只有 {inv_list[choose - 1].num} 个 {inv_list[choose - 1].name}')
-                                else:
-                                    print(f'这不是一个有效的数字')
-
+                        case 2:  # 往锅里扔东西
                             inv_list = inv.export()
+                            while choose := input(f'\n选择要扔到锅里的东西:\n{"\n".join(f"{index + 1}. {item.name}" for index, item in enumerate(inv_list))}\n0. 取消\n'):
+                                try: choose = int(choose)
+                                except ValueError: choose = 0
+                                if choose > len(inv_list): choose = 0
 
-                    case 3:  # 加热锅
-                        print(f'\n你往锅底加了点柴火')
-                        if pot.dealch():
-                            print(f'锅里似乎发生了一些变化(物品被分解)')
+                                if choose != 0:
+                                    num = input(f'要添加的数量(1, 最大 {inv_list[choose - 1].num}): ')
+                                    try: num = int(num)
+                                    except ValueError: num = 1
 
-                    case 4:  # 搅拌锅
-                        print(f'\n你搅拌了一会锅')
-                        if result := pot.reaction():
-                            item = result[1]
-                            if result[0]:
-                                print(f'锅里冒出了一点气泡(产生新元素)')
-                            if item:
-                                inv.add(*item)
-                                print(f'锅里浮现出了:\n{", ".join([f"{res.num}*{res.name}" for res in item])}\n你将这些东西放进了背包')
+                                    if 1 <= num <= inv_list[choose - 1].num:
+                                        pot.add(*inv.take_out(type(inv_list[choose - 1])(num)))
+                                        print(f'你往锅里加了 {num}*{type(inv_list[choose - 1]).name}')
+                                    elif num >= inv_list[choose - 1].num:
+                                        print(f'你只有 {inv_list[choose - 1].num} 个 {inv_list[choose - 1].name}')
+                                    else:
+                                        print(f'这不是一个有效的数字')
 
-                    case 5:  # 检查炼金手册
-                        print(f'你的笔记上记载了一些炼金配方:\n{"\n".join([f"{recipe_name}: {' + '.join([f'{res.num}*{res.name}' for res in recipe.requires])} = {', '.join([f'{res.num}*{res.name}' for res in recipe.provides])}" for recipe_name, recipe in standard_alchemy_recipes.items()])}')
-                        input(f'按回车以继续...')
+                                inv_list = inv.export()
 
-        case 3:  # 向背包里添加物品
-            while choose := input(f'\n选择要添加的物品:\n{"\n".join([f"{index + 1}. {item.name}" for index, item in enumerate(items)])}\n0. 取消\n'):
-                try: choose = int(choose)
-                except ValueError: choose = 0
-                if choose > len(items): choose = 0
+                        case 3:  # 加热锅
+                            print(f'\n你往锅底加了点柴火')
+                            if pot.dealch():
+                                print(f'锅里似乎发生了一些变化(物品被分解)')
 
-                if choose != 0:
-                    num = input('要添加的数量(1): ')
-                    try: num = int(num)
-                    except ValueError: num = 1
+                        case 4:  # 搅拌锅
+                            print(f'\n你搅拌了一会锅')
+                            if result := pot.reaction():
+                                item = result[1]
+                                if result[0]:
+                                    print(f'锅里冒出了一点气泡(产生新元素)')
+                                if item:
+                                    inv.add(*item)
+                                    print(f'锅里浮现出了:\n{", ".join([f"{res.num}*{res.name}" for res in item])}\n你将这些东西放进了背包')
 
-                    inv.add(items[choose - 1](num))
-                    print(f'\n你往背包里加入了 {num}*{items[choose - 1].name}')
+                        case 5:  # 检查炼金手册
+                            print(f'你的笔记上记载了一些炼金配方:\n{"\n".join([f"{recipe_name}: {' + '.join([f'{res.num}*{res.name}' for res in recipe.requires])} = {', '.join([f'{res.num}*{res.name}' for res in recipe.provides])}" for recipe_name, recipe in standard_alchemy_recipes.items()])}')
+                            input(f'按回车以继续...')
+
+            case 3:  # 向背包里添加物品
+                while choose := input(f'\n选择要添加的物品:\n{"\n".join([f"{index + 1}. {item.name}" for index, item in enumerate(items)])}\n0. 取消\n'):
+                    try: choose = int(choose)
+                    except ValueError: choose = 0
+                    if choose > len(items): choose = 0
+
+                    if choose != 0:
+                        num = input('要添加的数量(1): ')
+                        try: num = int(num)
+                        except ValueError: num = 1
+
+                        inv.add(items[choose - 1](num))
+                        print(f'\n你往背包里加入了 {num}*{items[choose - 1].name}')

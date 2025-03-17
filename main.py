@@ -1,10 +1,9 @@
-from core.resources.inventory import Inventory
-from core.resources.resource import Resource
 from gui.base_objects import *
 from gui import config as gui_config
 from gui.game_objects import InventoryManager
 from gui.ui_mgr import UIManager
 
+from core.main import *
 
 # ==== 测试用的类 ====
 class TestRes1(Resource):
