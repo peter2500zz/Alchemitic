@@ -2,7 +2,7 @@ from __future__ import annotations
 import pygame
 
 from gui.colors import *
-from gui.config import ZIndex, WINDOW_SIZE
+from gui.config import ZIndex, WINDOW_SIZE, FONTS
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -93,7 +93,6 @@ class PgObject(object):
         pygame.draw.rect(surface, self.color, self.rect)
 
 
-
 class DraggableObject(PgObject):
     """
     可拖动物体类
@@ -107,6 +106,7 @@ class DraggableObject(PgObject):
         self.can_be_dragged = True  # 是否可以被拖拽
         self.holding = False  # 是否正在被拖拽
         self._mouse_offset = (0, 0)  # 拖拽相对鼠标的偏移
+        self.z_index = ZIndex.dragging
 
     def _handle_event(self, event, manager):
         """
@@ -198,7 +198,8 @@ class TextObject(PgObject):
         super().__init__(rect)
 
         self.text = text
-        self.font = pygame.font.SysFont("microsoftyahei", font_size)
+        self.font = pygame.font.SysFont(FONTS, font_size)
+        self.z_index = ZIndex.text
 
         self.reverse_v = reverse_v
         self.reverse_h = reverse_h

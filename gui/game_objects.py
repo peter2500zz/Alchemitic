@@ -1,8 +1,7 @@
 from __future__ import annotations
 
 from gui.base_objects import *
-from gui import config as gui_config
-from gui.config import ZIndex
+from gui.config import *
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -95,6 +94,7 @@ class ItemObject(DraggableObject):
         super().__init__(rect, color=color)
 
         self.item = item
+        self.z_index = ZIndex.dragging_item
 
 
 class ItemSlotObject(DraggableObject):
@@ -108,10 +108,10 @@ class ItemSlotObject(DraggableObject):
         self.item: Resource = item
         self.num = item.num
         self.tooltip = ToolTipObject(self.item.name, self.item.description, color=WHITE)
-        print(self.tooltip)
+        # print(self.tooltip)
 
         self._font_size = 24
-        self.font = pygame.font.SysFont("microsoftyahei", self._font_size)
+        self.font = pygame.font.SysFont(FONTS, self._font_size)
 
         self._takeable = True
         self._take_out_num = 1  # 除非调试不然不要改这个！！！
@@ -128,7 +128,7 @@ class ItemSlotObject(DraggableObject):
             take_out_item.holding = True
             manager.add(take_out_item)
             self.num -= self._take_out_num
-            print(f'从 {self.color} 获取了 {take_out_item.color}')
+            # print(f'从 {self.color} 获取了 {take_out_item.color}')
 
     def _on_drag_end(self, manager: UIManager) -> None:
         # todo! 话又说回来了，我觉得应该加一个滚轮来应对物品很多的情况，其他例如文本在超出self.rect时候也可以用这个滚轮，mixin？遮罩？
@@ -186,7 +186,7 @@ class ToolTipObject(PgObject):
         self.title = title
         self.desc: list[str] = desc.split('\n')
         self._font_size = 16
-        self.font = pygame.font.SysFont("microsoftyahei", self._font_size)
+        self.font = pygame.font.SysFont(FONTS, self._font_size)
 
         self.z_index = ZIndex.tooltip
         self.visible = False
@@ -203,10 +203,10 @@ class ToolTipObject(PgObject):
         self.rect.top -= self._font_size
         self.rect.left += self._font_size
 
-        if self.rect.right > gui_config.WINDOW_SIZE[0]:
-            self.rect.right = gui_config.WINDOW_SIZE[0]
-        if self.rect.bottom > gui_config.WINDOW_SIZE[1]:
-            self.rect.bottom = gui_config.WINDOW_SIZE[1]
+        if self.rect.right > WINDOW_SIZE[0]:
+            self.rect.right = WINDOW_SIZE[0]
+        if self.rect.bottom > WINDOW_SIZE[1]:
+            self.rect.bottom = WINDOW_SIZE[1]
 
         pygame.draw.rect(surface, self.color, self.rect)
         text_offset = 0
