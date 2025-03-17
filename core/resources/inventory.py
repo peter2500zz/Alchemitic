@@ -147,20 +147,3 @@ class Inventory:
         self.remove(*resources)
         return resources
 
-
-
-if __name__ == '__main__':
-    class sub1(Resource):
-        pass
-    class sub2(Resource):
-        pass
-
-    res1 = sub1(5)
-    res2 = sub2(99)
-    res3 = sub1(5)
-    res4 = sub2()
-
-    inv1 = Inventory(res1, res2)
-    inv2 = Inventory(res3, res2)
-    print([(x.__class__.__name__, x.num) for x in inv1.export('num')])
-
