@@ -90,11 +90,27 @@ class ItemObject(DraggableObject):
     """
     被拿出来的物品
     """
-    def __init__(self, rect, item: Resource, *, color=BLACK):
+    def __init__(self, rect, item: Resource, tooltip: ToolTipObject, *, color=BLACK):
         super().__init__(rect, color=color)
 
         self.item = item
+        self.tooltip = tooltip
         self.z_index = ZIndex.dragging_item
+
+    def on_create(self, manager: UIManager):
+        manager.add(self.tooltip)
+
+    def on_remove(self, manager: UIManager):
+        manager.remove(self.tooltip)
+
+    def _update(self, manager):
+        super()._update(manager)
+
+        # 只有不被拖动以及鼠标在自身时才显示 tooltip
+        if self.rect.collidepoint(pygame.mouse.get_pos()) and not self.holding:
+            self.tooltip.visible = True
+        else:
+            self.tooltip.visible = False
 
 
 class ItemSlotObject(DraggableObject):
@@ -124,7 +140,12 @@ class ItemSlotObject(DraggableObject):
 
     def _on_drag_start(self, manager: UIManager) -> None:
         if self._takeable:
-            take_out_item = ItemObject((0, 0, 48, 48), type(self.item)(self._take_out_num), color=CYAN)
+            take_out_item = ItemObject(
+                (0, 0, 48, 48),
+                type(self.item)(self._take_out_num),
+                ToolTipObject(self.item.name, self.item.description, color=WHITE),
+                color=CYAN
+            )
             take_out_item.holding = True
             manager.add(take_out_item)
             self.num -= self._take_out_num
@@ -139,7 +160,8 @@ class ItemSlotObject(DraggableObject):
             raise ValueError("物品数量不足")
 
     def _update(self, manager):
-        if self.rect.collidepoint(pygame.mouse.get_pos()):
+        # 只有不被拖动以及鼠标在自身时才显示 tooltip
+        if self.rect.collidepoint(pygame.mouse.get_pos()) and not self.holding:
             self.tooltip.visible = True
         else:
             self.tooltip.visible = False

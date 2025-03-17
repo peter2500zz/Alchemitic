@@ -6,30 +6,20 @@ from gui.debug import GUIDebug
 
 from core.main import *
 
+logger = logging.getLogger("GUI")
+
 
 # ==== 测试用的类 ====
-class TestRes1(Resource):
-    def __init__(self, num: int = 10):
-        super().__init__(num)
-        self.name = '灵感菇'
-        self.description = '灵感菇力菇力菇力刮擦\n灵感菇 灵感菇'
-
-class TestRes2(Resource):
-    def __init__(self, num: int = 3):
-        super().__init__(num)
-        self.name = '叮咚鸡'
-        self.description = '叮\n咚鸡\n叮咚鸡'
 
 
 # 初始化及使用示例
+logger.info(f'初始化GUI')
 pygame.init()
 screen = pygame.display.set_mode(WINDOW_SIZE)
 clock = pygame.time.Clock()
 
 # 我自己的变量
-res1 = TestRes1()
-res2 = TestRes2()
-inv = Inventory(res1, res2)
+inv = Inventory(FlameFlower(10), Stone(5), WaterLotus(3), StoneBrick(1))
 inv_mgr = InventoryManager((20, 20, 256, 256), inv)
 debug_info = GUIDebug()
 ui = UIManager(clock)

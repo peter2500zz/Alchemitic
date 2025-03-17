@@ -73,13 +73,12 @@ class Inventory:
         """
         返回由自身库存组成的列表
 
-        :param order: 可选值 (name/type/num)。分别按照 名称 0-9A-Za-z / 种类 0-9A-Za-z / 数量 高-低 排序
+        :param order: 可选值 (name/type/num)。分别按照 种类 0-9A-Za-z / 数量 高-低 排序
         :return: 由自身库存组成的列表
         """
         resource_list: list = list(self._inventory.values())
+        resource_list.sort(key=lambda x: x.name)
         match order:
-            case 'name':
-                pass  # todo! 按照名字排序
             case 'type':
                 resource_list.sort(key=lambda resource: resource.category.value)
             case 'num':
