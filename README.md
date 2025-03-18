@@ -1,6 +1,6 @@
-一个以炼金术为主题的小游戏 <br />
-v0.0.1-alpha
+# Alchemitic
 
-可以直接运行 `core/main.py` 无需安装依赖
+从经典Minecraft mod 神秘时代4，以及模拟经营游戏 Potion Craft 中获取灵感制作的一个小游戏
 
-Python 3.12
+可以直接运行CLI `core/main.py` 且无需安装依赖 <br />
+GUI `main.py` 正在制作中
