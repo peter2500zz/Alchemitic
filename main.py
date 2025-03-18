@@ -32,7 +32,11 @@ inv = Inventory(
     Aer(1),
     Ordo(1),
     Perditio(1),
-    Lux(1)
+    Lux(1),
+    AlchemyCoal(1),
+    Victus(1),
+    Motus(1),
+    Vacuos(1),
 )
 inv_mgr = InventoryObject((0, 64, 232, 306), inv)
 debug_info = GUIDebug()

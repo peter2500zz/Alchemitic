@@ -19,21 +19,20 @@ class InventoryObject(PgObject):
     def __init__(self, rect, inv: Inventory):
         super().__init__(rect, color=GREY)
         self.inv = inv
-        self.item_slot_rect = (-64, -64, 64, 64)  # 物品的大小
+        self.item_slot_rect = (self.rect.x, self.rect.y, 64, 64)  # 物品的大小
         #  背包的所有槽位，根据自己的物品栏设定，物品栏必然是动态的
-        self.item_slots = {type(res): ItemSlotObject(self.item_slot_rect, res) for res in inv.export()}
+        self.item_slots = {type(res): ItemSlotObject(self.item_slot_rect, res, render_clip=self.rect) for res in inv.export()}
 
         self._slot_gap = 10  # px
-        self._max_item_row = 4
+        self._max_item_row = 9999  # todo! 迟早要删掉，毕竟取消了分页的想法
         self._max_item_col = 3
 
         self._item_page = self._calc_page()
-        self._current_page = 0
+        self._rolling_offset = 0
 
         self._buttons = [
-            BtnObject((350, 20, 64, 64), self._previous_page, color=RED),
-            BtnObject((430, 20, 64, 64), self._next_page, color=BLUE),
-
+            # BtnObject((350, 20, 64, 64), self._previous_page, color=RED),
+            # BtnObject((430, 20, 64, 64), self._next_page, color=BLUE),
         ]
 
     def on_create(self, manager: UIManager):
@@ -59,6 +58,11 @@ class InventoryObject(PgObject):
                         #  自身物品栏添加（相当于放回去）
                         self.inv.add(item_obj.item)
                         manager.remove(item_obj)
+        elif event.type == pygame.MOUSEWHEEL:
+            # print(event.y)
+            if event.y != 0:
+                self._rolling_offset += event.y * 5  # 简易滚轮系统
+
         return False
 
     def _update(self, manager):
@@ -69,10 +73,15 @@ class InventoryObject(PgObject):
             for item_slot in self.item_slots.values():
                 manager.remove(item_slot)
             # 重新初始化新的物品槽
-            self.item_slots = {type(res): ItemSlotObject(self.item_slot_rect, res) for res in self.inv.export()}
+            self.item_slots = {type(res): ItemSlotObject(self.item_slot_rect, res, render_clip=self.rect) for res in self.inv.export()}
             for item_slot in self.item_slots.values():
                 manager.add(item_slot)
+        # 重新计算物品的显示位置
         self._item_page = self._calc_page()
+
+        # 归零过大滚动偏移
+        if self._rolling_offset > 0:
+            self._rolling_offset = 0
 
     def _draw(self, surface, manager):
         """
@@ -83,14 +92,9 @@ class InventoryObject(PgObject):
         for page, page_list in enumerate(self._item_page):
             for row, row_list in enumerate(page_list):
                 for col, item_slot in enumerate(row_list):
-                    if page != self._current_page:
-                        item_slot.active = False
-                        item_slot.visible = False
-                        continue
-
                     item_slot.rect.topleft = (
                         self.rect.left + (item_slot.rect.width + self._slot_gap) * col + self._slot_gap,
-                        self.rect.top + (item_slot.rect.height + self._slot_gap) * row + self._slot_gap
+                        self.rect.top + (item_slot.rect.height + self._slot_gap) * row + self._slot_gap + self._rolling_offset
                     )
 
     def _calc_page(self):
@@ -122,22 +126,7 @@ class InventoryObject(PgObject):
         if row_list:
             render_list.append(row_list)
 
-        # for page in render_list:
-        #     for row in page:
-        #         for item in row:
-        #             print(item.item.name, end=' ')
-        #         print()
-        #     print(f'====')
-
         return render_list
-
-    def _next_page(self):
-        if self._current_page + 1 < len(self._item_page):
-            self._current_page += 1
-
-    def _previous_page(self):
-        if self._current_page - 1 >= 0:
-            self._current_page -= 1
 
 
 class ItemObject(DraggableObject):
@@ -165,13 +154,6 @@ class ItemObject(DraggableObject):
             self.tooltip.visible = True
         else:
             self.tooltip.visible = False
-        # if self.rect.bottom < WINDOW_SIZE[1]:
-        #     if self.rect.bottom + 5 >= WINDOW_SIZE[1]:
-        #         self.rect.bottom = WINDOW_SIZE[1]
-        #     else:
-        #         self.rect.bottom += 5
-        # else:
-        #     self.rect.bottom = WINDOW_SIZE[1]
 
 
 class ItemSlotObject(DraggableObject):
@@ -179,8 +161,8 @@ class ItemSlotObject(DraggableObject):
     单个物品的库存位
     可以用于展示物品或者从中拖拽出物品实例
     """
-    def __init__(self, rect, item: Resource, *, color=WHITE):
-        super().__init__(rect, color=color)
+    def __init__(self, rect, item: Resource, *, color=WHITE, render_clip: pygame.Rect = None):
+        super().__init__(rect, color=color, render_clip=render_clip)
 
         self.item: Resource = item
         self.num = item.num
@@ -199,8 +181,8 @@ class ItemSlotObject(DraggableObject):
     def on_remove(self, manager: UIManager):
         manager.remove(self.tooltip)
 
-    def _on_drag_start(self, manager: UIManager) -> None:
-        if self._takeable:
+    def _on_drag_start(self, manager: UIManager) -> bool:
+        if self._takeable and (self.render_clip is None or self.render_clip.collidepoint(pygame.mouse.get_pos())):
             take_out_item = ItemObject(
                 (0, 0, 48, 48),
                 type(self.item)(self._take_out_num),
@@ -211,21 +193,29 @@ class ItemSlotObject(DraggableObject):
             manager.add(take_out_item)
             self.num -= self._take_out_num
             # print(f'从 {self.color} 获取了 {take_out_item.color}')
+            return True
+
+        return False  # 否则不允许开始拖拽
 
     def _on_drag_end(self, manager: UIManager) -> None:
         # todo! 话又说回来了，我觉得应该加一个滚轮来应对物品很多的情况，其他例如文本在超出self.rect时候也可以用这个滚轮，mixin？遮罩？
-
-        if self.item.num - self._take_out_num >= 0:
-            self.item.num -= self._take_out_num
-        else:
-            raise ValueError("物品数量不足")
+        if self.holding:
+            if self.item.num - self._take_out_num >= 0:
+                self.item.num -= self._take_out_num
+            else:
+                raise ValueError("物品数量不足")
 
     def _update(self, manager):
         # 只有不被拖动以及鼠标在自身时才显示 tooltip
-        if self.rect.collidepoint(pygame.mouse.get_pos()) and not self.holding and not pygame.mouse.get_pressed()[0]:
-            self.tooltip.visible = True
-        else:
-            self.tooltip.visible = False
+        mouse_pos = pygame.mouse.get_pos()
+        mouse_pressed = pygame.mouse.get_pressed()[0]
+
+        self.tooltip.visible = (
+                self.rect.collidepoint(mouse_pos)
+                and not self.holding
+                and not mouse_pressed
+                and (self.render_clip is None or self.render_clip.collidepoint(mouse_pos))
+        )
 
     def _draw(self, surface, manager):
         super()._draw(surface, manager)
