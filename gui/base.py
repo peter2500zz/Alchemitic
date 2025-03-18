@@ -185,14 +185,14 @@ class BtnObject(PgObject):
                 self.pressed = False
                 if self.rect.collidepoint(event.pos):
                     # 如果在自身范围内释放则调用 _on_clicked
-                    self._on_clicked(manager)
+                    self._on_clicked()
 
-    def _on_clicked(self, manager: UIManager) -> None:
+    def _on_clicked(self) -> None:
         """
         当按下时触发
         按下的定义在 _handle_event 里
         """
-        return self.func(*self.args, **self.kwargs, manager=manager)
+        return self.func(*self.args, **self.kwargs)
 
 
 class TextObject(PgObject):

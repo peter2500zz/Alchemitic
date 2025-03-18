@@ -22,6 +22,7 @@ class InfoDebug(TextObject):
             f'inv: {[{res.name: res.num for res in inv.inv.export()} for inv in manager.query(InventoryObject)]}',
             f'mouse_pos: {pygame.mouse.get_pos()}',
             f'fps: {manager.clock.get_fps():.2f}',
+            f'pages: {[inv._current_page for inv in manager.query(InventoryObject)]}',
         ]
         self.text = '\n'.join(text)
 

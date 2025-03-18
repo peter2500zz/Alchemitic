@@ -19,8 +19,22 @@ screen = pygame.display.set_mode(WINDOW_SIZE)
 clock = pygame.time.Clock()
 
 # 我自己的变量
-inv = Inventory(FlameFlower(10), Stone(5), WaterLotus(3), StoneBrick(1))
-inv_mgr = InventoryObject((20, 20, 256, 256), inv)
+inv = Inventory(
+    FlameFlower(10),
+    Stone(5),
+    WaterLotus(3),
+    StoneBrick(1),
+    Feather(1),
+    Gravel(1),
+    Coal(1),
+    Ignis(1),
+    Aqua(1),
+    Aer(1),
+    Ordo(1),
+    Perditio(1),
+    Lux(1)
+)
+inv_mgr = InventoryObject((0, 64, 232, 306), inv)
 debug_info = GUIDebug()
 ui = UIManager(clock)
 ui.add(inv_mgr, debug_info)

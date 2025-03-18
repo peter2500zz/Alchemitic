@@ -19,14 +19,30 @@ class InventoryObject(PgObject):
     def __init__(self, rect, inv: Inventory):
         super().__init__(rect, color=GREY)
         self.inv = inv
-        self.item_slot_rect = (96, 96, 64, 64)  # 背包的大小
+        self.item_slot_rect = (-64, -64, 64, 64)  # 物品的大小
         #  背包的所有槽位，根据自己的物品栏设定，物品栏必然是动态的
         self.item_slots = {type(res): ItemSlotObject(self.item_slot_rect, res) for res in inv.export()}
+
+        self._slot_gap = 10  # px
+        self._max_item_row = 4
+        self._max_item_col = 3
+
+        self._item_page = self._calc_page()
+        self._current_page = 0
+
+        self._buttons = [
+            BtnObject((350, 20, 64, 64), self._previous_page, color=RED),
+            BtnObject((430, 20, 64, 64), self._next_page, color=BLUE),
+
+        ]
 
     def on_create(self, manager: UIManager):
         #  当自身被创建的时候将所有物品槽位加入管理器，初始化
         for item_slot in self.item_slots.values():
             manager.add(item_slot)
+
+        for button in self._buttons:
+            manager.add(button)
 
     def _handle_event(self, event: pygame.event.Event, manager: UIManager) -> bool:
         if event.type == pygame.MOUSEBUTTONUP:
@@ -56,34 +72,72 @@ class InventoryObject(PgObject):
             self.item_slots = {type(res): ItemSlotObject(self.item_slot_rect, res) for res in self.inv.export()}
             for item_slot in self.item_slots.values():
                 manager.add(item_slot)
+        self._item_page = self._calc_page()
 
     def _draw(self, surface, manager):
         """
-        AI 代码 绘制物品槽位
+        绘制物品槽位
         """
         super()._draw(surface, manager)
-        start_x = self.rect.left  # 从容器左边界开始
-        start_y = self.rect.top  # 从容器上边界开始
+
+        for page, page_list in enumerate(self._item_page):
+            for row, row_list in enumerate(page_list):
+                for col, item_slot in enumerate(row_list):
+                    if page != self._current_page:
+                        item_slot.active = False
+                        item_slot.visible = False
+                        continue
+
+                    item_slot.rect.topleft = (
+                        self.rect.left + (item_slot.rect.width + self._slot_gap) * col + self._slot_gap,
+                        self.rect.top + (item_slot.rect.height + self._slot_gap) * row + self._slot_gap
+                    )
+
+    def _calc_page(self):
+        """
+        按照定义的最大行列数制表
+        """
+        render_list = []
         col = 0
         row = 0
+        col_list = []
+        row_list = []
 
         for item_slot in self.item_slots.values():
-            # 计算当前预估宽度
-            total_width = (item_slot.rect.width + 20) * (col + 1) - 20
-
-            # 换行判断（包含间隔的总宽度是否超出容器）
-            if total_width > self.rect.width:
-                row += 1
-                col = 0
-
-            # 计算实际坐标
-            x = start_x + col * (item_slot.rect.width + 20)
-            y = start_y + row * (item_slot.rect.height + 20)
-
-            # 更新位置
-            item_slot.rect.topleft = (x, y)
-
+            col_list.append(item_slot)
             col += 1
+
+            if row >= self._max_item_row:
+                render_list.append(row_list)
+                row_list = []
+                row = 0
+            if col >= self._max_item_col:
+                row_list.append(col_list)
+                col_list = []
+                col = 0
+                row += 1
+
+        if col_list:
+            row_list.append(col_list)
+        if row_list:
+            render_list.append(row_list)
+
+        # for page in render_list:
+        #     for row in page:
+        #         for item in row:
+        #             print(item.item.name, end=' ')
+        #         print()
+        #     print(f'====')
+
+        return render_list
+
+    def _next_page(self):
+        if self._current_page + 1 < len(self._item_page):
+            self._current_page += 1
+
+    def _previous_page(self):
+        if self._current_page - 1 >= 0:
+            self._current_page -= 1
 
 
 class ItemObject(DraggableObject):

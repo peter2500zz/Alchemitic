@@ -35,8 +35,12 @@ class ToolTipObject(PgObject):
 
         if self.rect.right > WINDOW_SIZE[0]:
             self.rect.right = WINDOW_SIZE[0]
+        elif self.rect.left < 0:
+            self.rect.left = 0
         if self.rect.bottom > WINDOW_SIZE[1]:
             self.rect.bottom = WINDOW_SIZE[1]
+        elif self.rect.top < 0:
+            self.rect.top = 0
 
         pygame.draw.rect(surface, self.color, self.rect)
         text_offset = 0
