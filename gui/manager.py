@@ -4,7 +4,7 @@ import pygame
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     # 可能有一些耦合度问题
-    from gui.base_objects import PgObject
+    from gui.base import PgObject
 
 
 class UIManager:

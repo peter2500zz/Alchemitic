@@ -1,13 +1,12 @@
 from __future__ import annotations
 import pygame
 
-from gui.colors import *
-from gui.config import ZIndex, WINDOW_SIZE
+from gui.config import *
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     # 可能有一些耦合度问题
-    from gui.ui_mgr import UIManager
+    from gui.manager import UIManager
 
 
 class PgObject(object):
@@ -57,7 +56,7 @@ class PgObject(object):
             return False
         return self._handle_event(event, manager)
 
-    def _handle_event(self, event: pygame.event.Event, manager: UIManager) -> bool | bool:
+    def _handle_event(self, event: pygame.event.Event, manager: UIManager) -> bool:
         """
         游戏窗口接收到输入时调用此方法
         """
@@ -93,7 +92,6 @@ class PgObject(object):
         pygame.draw.rect(surface, self.color, self.rect)
 
 
-
 class DraggableObject(PgObject):
     """
     可拖动物体类
@@ -107,6 +105,7 @@ class DraggableObject(PgObject):
         self.can_be_dragged = True  # 是否可以被拖拽
         self.holding = False  # 是否正在被拖拽
         self._mouse_offset = (0, 0)  # 拖拽相对鼠标的偏移
+        self.z_index = ZIndex.dragging
 
     def _handle_event(self, event, manager):
         """
@@ -163,10 +162,13 @@ class BtnObject(PgObject):
     """
     按钮obj类
     """
-    def __init__(self, rect, *, color=BLACK):
+    def __init__(self, rect, func, args: list = None, kwargs: dict = None, *, color=BLACK):
         super().__init__(rect, color=color)
 
         self.pressed = False
+        self.func = func
+        self.args = args if args else []
+        self.kwargs = kwargs if kwargs else {}
 
     def _handle_event(self, event, manager):
         """
@@ -190,7 +192,7 @@ class BtnObject(PgObject):
         当按下时触发
         按下的定义在 _handle_event 里
         """
-        pass
+        return self.func(*self.args, **self.kwargs, manager=manager)
 
 
 class TextObject(PgObject):
@@ -198,7 +200,8 @@ class TextObject(PgObject):
         super().__init__(rect)
 
         self.text = text
-        self.font = pygame.font.SysFont("microsoftyahei", font_size)
+        self.font = pygame.font.SysFont(FONTS, font_size)
+        self.z_index = ZIndex.text
 
         self.reverse_v = reverse_v
         self.reverse_h = reverse_h

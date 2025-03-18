@@ -1,6 +1,6 @@
 from copy import deepcopy
 
-from core.resources.resource_error import *
+from core.resources.error import *
 from core.resources.resource import Resource
 from core.recipes.recipe import Recipe
 
@@ -73,13 +73,12 @@ class Inventory:
         """
         返回由自身库存组成的列表
 
-        :param order: 可选值 (name/type/num)。分别按照 名称 0-9A-Za-z / 种类 0-9A-Za-z / 数量 高-低 排序
+        :param order: 可选值 (name/type/num)。分别按照 种类 0-9A-Za-z / 数量 高-低 排序
         :return: 由自身库存组成的列表
         """
         resource_list: list = list(self._inventory.values())
+        resource_list.sort(key=lambda x: x.name)
         match order:
-            case 'name':
-                pass  # todo! 按照名字排序
             case 'type':
                 resource_list.sort(key=lambda resource: resource.category.value)
             case 'num':
@@ -90,9 +89,15 @@ class Inventory:
         return resource_list
 
     def keys(self):
+        """
+        返回包含的所有物品类
+        """
         return self._inventory.keys()
 
     def check_num(self):
+        """
+        清除背包内小于等于0的物品
+        """
         for resource in self._inventory.copy().values():
             if resource.num <= 0:
                 self.remove(resource)
@@ -146,21 +151,4 @@ class Inventory:
     def take_out(self, *resources: Resource):
         self.remove(*resources)
         return resources
-
-
-
-if __name__ == '__main__':
-    class sub1(Resource):
-        pass
-    class sub2(Resource):
-        pass
-
-    res1 = sub1(5)
-    res2 = sub2(99)
-    res3 = sub1(5)
-    res4 = sub2()
-
-    inv1 = Inventory(res1, res2)
-    inv2 = Inventory(res3, res2)
-    print([(x.__class__.__name__, x.num) for x in inv1.export('num')])
 
