@@ -1,6 +1,6 @@
 from copy import deepcopy
 
-from core.resources.resource_error import *
+from core.resources.error import *
 from core.resources.resource import Resource
 from core.recipes.recipe import Recipe
 

@@ -1,6 +1,6 @@
 from core.recipes.recipe import AlchemyRecipe
 from core.resources.inventory import Inventory
-from core.alchemy.bases import CrucibleBase
+from core.alchemy.config import CrucibleBase
 from core.resources.resource import *
 
 

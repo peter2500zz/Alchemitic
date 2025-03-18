@@ -12,7 +12,7 @@ logging.basicConfig(
     level=logging.INFO,
     handlers=[
         logging.StreamHandler(),
-        logging.FileHandler("app.log")
+        logging.FileHandler("app.log", encoding="utf-8"),
     ]
 )
 logger = logging.getLogger("Core")

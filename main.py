@@ -1,8 +1,8 @@
-from gui.base_objects import *
+from gui.base import *
 from gui.config import *
-from gui.game_objects import InventoryManager
-from gui.ui_mgr import UIManager
-from gui.debug import GUIDebug
+from gui.screens.item import InventoryObject
+from gui.manager import UIManager
+from gui.screens.debug import GUIDebug
 
 from core.main import *
 
@@ -20,7 +20,7 @@ clock = pygame.time.Clock()
 
 # 我自己的变量
 inv = Inventory(FlameFlower(10), Stone(5), WaterLotus(3), StoneBrick(1))
-inv_mgr = InventoryManager((20, 20, 256, 256), inv)
+inv_mgr = InventoryObject((20, 20, 256, 256), inv)
 debug_info = GUIDebug()
 ui = UIManager(clock)
 ui.add(inv_mgr, debug_info)

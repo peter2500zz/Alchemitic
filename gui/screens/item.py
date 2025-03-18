@@ -1,17 +1,18 @@
 from __future__ import annotations
 
-from gui.base_objects import *
+from gui.base import *
 from gui.config import *
+from gui.screens.tooltip import ToolTipObject
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     # 可能有一些耦合度问题
-    from gui.ui_mgr import UIManager
+    from gui.manager import UIManager
     from core.resources.resource import Resource
     from core.resources.inventory import Inventory
 
 
-class InventoryManager(PgObject):
+class InventoryObject(PgObject):
     """
     背包模块
     """
@@ -34,7 +35,7 @@ class InventoryManager(PgObject):
                 #  查询所有被拿出来的实体
                 for item_obj in manager.query(ItemObject):
                     #  如果中心与自身相交
-                    if self.rect.collidepoint(item_obj.rect.center):
+                    if self.rect.collidepoint(item_obj.rect.center) and item_obj.rect.collidepoint(event.pos):
                         #  自身物品槽位的显示数量添加
                         for item_slot in self.item_slots.values():
                             if type(item_slot.item) == type(item_obj.item):
@@ -81,7 +82,6 @@ class InventoryManager(PgObject):
 
             # 更新位置
             item_slot.rect.topleft = (x, y)
-            item_slot.draw(surface, manager)
 
             col += 1
 
@@ -111,6 +111,13 @@ class ItemObject(DraggableObject):
             self.tooltip.visible = True
         else:
             self.tooltip.visible = False
+        # if self.rect.bottom < WINDOW_SIZE[1]:
+        #     if self.rect.bottom + 5 >= WINDOW_SIZE[1]:
+        #         self.rect.bottom = WINDOW_SIZE[1]
+        #     else:
+        #         self.rect.bottom += 5
+        # else:
+        #     self.rect.bottom = WINDOW_SIZE[1]
 
 
 class ItemSlotObject(DraggableObject):
@@ -179,10 +186,9 @@ class ItemSlotObject(DraggableObject):
 
 
 class ItemDestroyObject(PgObject):
-    def __init__(self, rect, *, color=BLACK):
-        self.mix_color = [WHITE for _ in range(5)]
+    def __init__(self, rect, *, color=RED):
 
-        super().__init__(rect, color=blend_colors(self.mix_color))
+        super().__init__(rect, color=color)
 
         self.num = 0
 
@@ -193,73 +199,6 @@ class ItemDestroyObject(PgObject):
             for item in items:
                 if self.rect.collidepoint(item.rect.center):
                     self.num += 1
-                    self.mix_color.append(item.color)
                     print(f'我销毁了 {item.color}')
                     manager.remove(item)
 
-    def _update(self, manager):
-        self.mix_color = self.mix_color[-5:]
-        self.color = blend_colors(self.mix_color)
-
-
-class ToolTipObject(PgObject):
-    def __init__(self, title: str = '标题',desc: str = '描述', *, color=BLACK):
-        super().__init__(color=color)
-        self.title = title
-        self.desc: list[str] = desc.split('\n')
-        self._font_size = 16
-        self.font = pygame.font.SysFont(FONTS, self._font_size)
-
-        self.z_index = ZIndex.tooltip
-        self.visible = False
-
-    def _draw(self, surface, manager):
-        title = self.font.render(self.title, True, RED)
-
-        desc = [self.font.render(desc, True, BLUE) for desc in self.desc]
-
-        self.rect.width = max(surface.get_rect().width for surface in [title] + desc)
-        self.rect.height = sum(surface.get_rect().height for surface in [title] + desc)
-
-        self.rect.topleft = pygame.mouse.get_pos()
-        self.rect.top -= self._font_size
-        self.rect.left += self._font_size
-
-        if self.rect.right > WINDOW_SIZE[0]:
-            self.rect.right = WINDOW_SIZE[0]
-        if self.rect.bottom > WINDOW_SIZE[1]:
-            self.rect.bottom = WINDOW_SIZE[1]
-
-        pygame.draw.rect(surface, self.color, self.rect)
-        text_offset = 0
-        for text_surface in [title] + desc:
-            text_rect = text_surface.get_rect()
-            text_rect.topleft = self.rect.topleft
-            text_rect.top += text_offset
-            surface.blit(text_surface, text_rect)
-            text_offset += text_rect.height
-
-
-
-def blend_colors(rgb_list):
-    """
-    AI 代码 每次调用时候偏移RGB
-    """
-    if not rgb_list:
-        raise ValueError("输入的RGB列表不能为空")
-
-    n = len(rgb_list)
-    sum_r = sum(rgb[0] for rgb in rgb_list)
-    sum_g = sum(rgb[1] for rgb in rgb_list)
-    sum_b = sum(rgb[2] for rgb in rgb_list)
-
-    avg_r = round(sum_r / n)
-    avg_g = round(sum_g / n)
-    avg_b = round(sum_b / n)
-
-    # 确保结果在0-255范围内
-    avg_r = max(0, min(255, avg_r))
-    avg_g = max(0, min(255, avg_g))
-    avg_b = max(0, min(255, avg_b))
-
-    return (avg_r, avg_g, avg_b)

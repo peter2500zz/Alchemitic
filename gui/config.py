@@ -10,5 +10,18 @@ class ZIndex(Enum):
     tooltip = 500
     debug = 999
 
+
+# ==== 颜色定义 ====
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+GREY = (128, 128, 128)
+RED = (255, 0, 0)
+GREEN = (0, 255, 0)
+BLUE = (0, 0, 255)
+YELLOW = (255, 255, 0)
+CYAN = (0, 255, 255)
+MAGENTA = (255, 0, 255)
+
+
 WINDOW_SIZE = (800, 450)
 FONTS = ["microsoftyahei", "wqy-zenhei"]

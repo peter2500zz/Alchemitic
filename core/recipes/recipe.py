@@ -1,5 +1,5 @@
-from core.alchemy.bases import CrucibleBase
-from core.resources.resource_error import *
+from core.alchemy.config import CrucibleBase
+from core.resources.error import *
 from core.resources.resource import *
 
 class Recipe:

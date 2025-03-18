@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-from gui.base_objects import *
-from gui.game_objects import InventoryManager
+from gui.base import *
+from gui.screens.item import InventoryObject
 
 if TYPE_CHECKING:
     # 可能有一些耦合度问题
-    from gui.ui_mgr import UIManager
+    from gui.manager import UIManager
 
 
 class InfoDebug(TextObject):
@@ -19,7 +19,7 @@ class InfoDebug(TextObject):
     def _update(self, manager: UIManager) -> None:
         text = [
             f'objects: {len(manager._frames[manager._current_frame])}',
-            f'inv: {[{res.name: res.num for res in inv.inv.export()} for inv in manager.query(InventoryManager)]}',
+            f'inv: {[{res.name: res.num for res in inv.inv.export()} for inv in manager.query(InventoryObject)]}',
             f'mouse_pos: {pygame.mouse.get_pos()}',
             f'fps: {manager.clock.get_fps():.2f}',
         ]

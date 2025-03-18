@@ -1,13 +1,12 @@
 from __future__ import annotations
 import pygame
 
-from gui.colors import *
-from gui.config import ZIndex, WINDOW_SIZE, FONTS
+from gui.config import *
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     # 可能有一些耦合度问题
-    from gui.ui_mgr import UIManager
+    from gui.manager import UIManager
 
 
 class PgObject(object):
@@ -163,10 +162,13 @@ class BtnObject(PgObject):
     """
     按钮obj类
     """
-    def __init__(self, rect, *, color=BLACK):
+    def __init__(self, rect, func, args: list = None, kwargs: dict = None, *, color=BLACK):
         super().__init__(rect, color=color)
 
         self.pressed = False
+        self.func = func
+        self.args = args if args else []
+        self.kwargs = kwargs if kwargs else {}
 
     def _handle_event(self, event, manager):
         """
@@ -190,7 +192,7 @@ class BtnObject(PgObject):
         当按下时触发
         按下的定义在 _handle_event 里
         """
-        pass
+        return self.func(*self.args, **self.kwargs, manager=manager)
 
 
 class TextObject(PgObject):
