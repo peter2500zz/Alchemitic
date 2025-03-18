@@ -16,6 +16,12 @@ class ToolTipObject(PgObject):
         self.visible = False
 
     def _draw(self, surface, manager):
+        for tooltip in manager.query(ToolTipObject):
+            if tooltip is self:
+                continue
+            if tooltip.visible:
+                return
+
         title = self.font.render(self.title, True, RED)
 
         desc = [self.font.render(desc, True, BLUE) for desc in self.desc]

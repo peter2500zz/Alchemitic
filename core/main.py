@@ -1,22 +1,12 @@
-import logging
-
 from core.alchemy.crucible import Crucible
 from core.resources.inventory import Inventory
 from core.recipes.recipe import standard_normal_recipes, standard_alchemy_recipes
 from core.resources.resource import *
+from core.logger import new_logger
 from core.config import *
 
-logging.basicConfig(
-    format="%(asctime)s [%(name)s/%(levelname)s] %(message)s",
-    datefmt="%H:%M:%S",
-    level=logging.INFO,
-    handlers=[
-        logging.StreamHandler(),
-        logging.FileHandler("app.log", encoding="utf-8"),
-    ]
-)
-logger = logging.getLogger("Core")
 
+logger = new_logger('Core')
 logger.info(f'==== 程序启动 {VERSION} ====')
 
 

@@ -107,7 +107,7 @@ class ItemObject(DraggableObject):
         super()._update(manager)
 
         # 只有不被拖动以及鼠标在自身时才显示 tooltip
-        if self.rect.collidepoint(pygame.mouse.get_pos()) and not self.holding:
+        if self.rect.collidepoint(pygame.mouse.get_pos()) and not self.holding and not pygame.mouse.get_pressed()[0]:
             self.tooltip.visible = True
         else:
             self.tooltip.visible = False
@@ -168,7 +168,7 @@ class ItemSlotObject(DraggableObject):
 
     def _update(self, manager):
         # 只有不被拖动以及鼠标在自身时才显示 tooltip
-        if self.rect.collidepoint(pygame.mouse.get_pos()) and not self.holding:
+        if self.rect.collidepoint(pygame.mouse.get_pos()) and not self.holding and not pygame.mouse.get_pressed()[0]:
             self.tooltip.visible = True
         else:
             self.tooltip.visible = False

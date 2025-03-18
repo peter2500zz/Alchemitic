@@ -6,14 +6,14 @@ from gui.screens.debug import GUIDebug
 
 from core.main import *
 
-logger = logging.getLogger("GUI")
+logger = new_logger('GUI')
 
 
 # ==== 测试用的类 ====
 
 
 # 初始化及使用示例
-logger.info(f'初始化GUI')
+logger.info(f'初始化 GUI')
 pygame.init()
 screen = pygame.display.set_mode(WINDOW_SIZE)
 clock = pygame.time.Clock()
@@ -35,6 +35,7 @@ while running:
         ui.handle_event(event)
 
         if event.type == pygame.QUIT:
+            logger.info(f'GUI 终止')
             running = False
 
     # ==== 逻辑更新 ====
