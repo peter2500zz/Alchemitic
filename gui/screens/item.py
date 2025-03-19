@@ -40,6 +40,7 @@ class InventoryObject(PgObject):
 
         self.rect.left -= self.rect.width
         self._open_switch_btn = BtnObject((-99999, -99999, 16, 64), self._switch_open, color=RED)
+        self._open_switch_btn.z_index = ZIndex.ui
 
     def _switch_open(self):
         if not self._open:
@@ -233,7 +234,7 @@ class ItemSlotObject(DraggableObject):
         return False  # 否则不允许开始拖拽
 
     def _handle_event(self, event, manager):
-        if self.render_clip.contains(self.rect):
+        if self.render_clip.collidepoint(pygame.mouse.get_pos()) or self.holding:
             return super()._handle_event(event, manager)
         return False
 

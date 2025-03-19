@@ -186,6 +186,7 @@ class BtnObject(PgObject):
             if self.rect.collidepoint(event.pos) and event.button == 1:
                 # 如果鼠标左键按下时在自身范围内则设定按住为 True
                 self.pressed = True
+                return True
 
         if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
             if self.pressed:
@@ -194,6 +195,7 @@ class BtnObject(PgObject):
                 if self.rect.collidepoint(event.pos):
                     # 如果在自身范围内释放则调用 _on_clicked
                     self._on_clicked()
+                return True
 
     def _on_clicked(self) -> None:
         """

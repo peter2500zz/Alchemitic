@@ -55,7 +55,7 @@ class GUIDebug(PgObject):
         super().__init__()
         self.debug = [InfoDebug()]#, ObjectDebug()]
 
-        self._is_debugging = True
+        self._is_debugging = False
 
     def _on_create(self, manager: UIManager):
         for debug in self.debug:
