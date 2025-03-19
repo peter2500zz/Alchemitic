@@ -18,30 +18,40 @@ class InventoryObject(PgObject):
     """
     def __init__(self, rect, inv: Inventory):
         super().__init__(rect, color=GREY)
+        self._open = False
         self.inv = inv
-        self.item_slot_rect = (self.rect.x, self.rect.y, 64, 64)  # 物品的大小
-        #  背包的所有槽位，根据自己的物品栏设定，物品栏必然是动态的
-        self.item_slots = {type(res): ItemSlotObject(self.item_slot_rect, res, render_clip=self.rect) for res in inv.export()}
+        self.item_slot_rect = (-99999, -99999, 64, 64)  # 物品的大小
 
         self._slot_gap = 10  # px
         self._max_item_row = 9999  # todo! 迟早要删掉，毕竟取消了分页的想法
         self._max_item_col = 3
 
+        #  背包的所有槽位，根据自己的物品栏设定，物品栏必然是动态的
+        self._solt_render_clip = self.rect.copy()
+        self._solt_render_clip.top += self._slot_gap
+        self._solt_render_clip.height -= self._slot_gap * 2
+        self.item_slots = {type(res): ItemSlotObject(self.item_slot_rect, res, render_clip=self._solt_render_clip) for res in inv.export()}
+
         self._item_page = self._calc_page()
         self._rolling_offset = 0
 
-        self._buttons = [
-            # BtnObject((350, 20, 64, 64), self._previous_page, color=RED),
-            # BtnObject((430, 20, 64, 64), self._next_page, color=BLUE),
-        ]
+        self.rect.left -= self.rect.width
+        self._open_switch_btn = BtnObject((-99999, -99999, 16, 64), self._switch_open, color=RED)
+
+    def _switch_open(self):
+        if not self._open:
+            self.rect.left += self.rect.width
+            self._open = True
+        else:
+            self.rect.left -= self.rect.width
+            self._open = False
 
     def on_create(self, manager: UIManager):
         #  当自身被创建的时候将所有物品槽位加入管理器，初始化
         for item_slot in self.item_slots.values():
             manager.add(item_slot)
 
-        for button in self._buttons:
-            manager.add(button)
+        manager.add(self._open_switch_btn)
 
     def _handle_event(self, event: pygame.event.Event, manager: UIManager) -> bool:
         if event.type == pygame.MOUSEBUTTONUP:
@@ -60,7 +70,7 @@ class InventoryObject(PgObject):
                         manager.remove(item_obj)
         elif event.type == pygame.MOUSEWHEEL:
             # print(event.y)
-            if event.y != 0:
+            if event.y != 0 and self.rect.collidepoint(pygame.mouse.get_pos()):
                 self._rolling_offset += event.y * 5  # 简易滚轮系统
 
         return False
@@ -73,7 +83,7 @@ class InventoryObject(PgObject):
             for item_slot in self.item_slots.values():
                 manager.remove(item_slot)
             # 重新初始化新的物品槽
-            self.item_slots = {type(res): ItemSlotObject(self.item_slot_rect, res, render_clip=self.rect) for res in self.inv.export()}
+            self.item_slots = {type(res): ItemSlotObject(self.item_slot_rect, res, render_clip=self._solt_render_clip) for res in self.inv.export()}
             for item_slot in self.item_slots.values():
                 manager.add(item_slot)
         # 重新计算物品的显示位置
@@ -82,6 +92,9 @@ class InventoryObject(PgObject):
         # 归零过大滚动偏移
         if self._rolling_offset > 0:
             self._rolling_offset = 0
+
+        self._open_switch_btn.rect.centery = self.rect.top + self.rect.height / 2
+        self._open_switch_btn.rect.left = self.rect.right
 
     def _draw(self, surface, manager):
         """
