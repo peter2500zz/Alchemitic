@@ -3,7 +3,9 @@ from enum import Enum
 class ZIndex(Enum):
     backgrounds = 0
     objects = 10
+    static_item = 19
     ui = 20
+    item_slot = 21
     dragging = 30
     dragging_item = 40
     text = 400

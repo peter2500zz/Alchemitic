@@ -60,6 +60,8 @@ class PgObject(object):
     def _handle_event(self, event: pygame.event.Event, manager: UIManager) -> bool:
         """
         游戏窗口接收到输入时调用此方法
+
+        :return: 如果为真则会消费此事件，其他obj无法继续响应
         """
         pass
 
