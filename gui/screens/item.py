@@ -3,11 +3,11 @@ from __future__ import annotations
 from gui.base import *
 from gui.config import *
 from gui.screens.tooltip import ToolTipObject
+from gui.manager.ui import UIManager
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     # 可能有一些耦合度问题
-    from gui.manager import UIManager
     from core.resources.resource import Resource
     from core.resources.inventory import Inventory
 
@@ -50,19 +50,19 @@ class InventoryObject(PgObject):
             self.rect.left -= self.rect.width
             self._open = False
 
-    def on_create(self, manager: UIManager):
+    def on_create(self):
         #  当自身被创建的时候将所有物品槽位加入管理器，初始化
         for item_slot in self.item_slots.values():
-            manager.add(item_slot)
+            UIManager.add(item_slot)
 
-        manager.add(self._open_switch_btn)
+        UIManager.add(self._open_switch_btn)
 
-    def _handle_event(self, event: pygame.event.Event, manager: UIManager) -> bool:
+    def _handle_event(self, event: pygame.event.Event) -> bool:
         if event.type == pygame.MOUSEBUTTONUP:
             #  当鼠标左键抬起的时
             if event.button == 1:
                 #  查询所有被拿出来的实体
-                for item_obj in manager.query(ItemObject):
+                for item_obj in UIManager.query(ItemObject):
                     if item_obj.z_index == ZIndex.static_item:
                         continue
                     #  如果中心与自身相交
@@ -73,7 +73,7 @@ class InventoryObject(PgObject):
                                 item_slot.num += item_obj.item.num
                         #  自身物品栏添加（相当于放回去）
                         self.inv.add(item_obj.item)
-                        manager.remove(item_obj)
+                        UIManager.remove(item_obj)
                     else:
                         item_obj.z_index = ZIndex.static_item
         elif event.type == pygame.MOUSEWHEEL:
@@ -83,17 +83,17 @@ class InventoryObject(PgObject):
 
         return False
 
-    def _update(self, manager):
+    def _update(self):
         self.inv.check_num()  # 检查有没有无效物品
         # 如果物品种类变化
         if set(self.inv.keys()) != set(self.item_slots.keys()):
             # 先移除已经实例化的物品槽
             for item_slot in self.item_slots.values():
-                manager.remove(item_slot)
+                UIManager.remove(item_slot)
             # 重新初始化新的物品槽
             self.item_slots = {type(res): ItemSlotObject(self.item_slot_rect, res, render_clip=self._solt_render_clip) for res in self.inv.export()}
             for item_slot in self.item_slots.values():
-                manager.add(item_slot)
+                UIManager.add(item_slot)
         # 重新计算物品的显示位置
         self._item_page = self._calc_item_table()
 
@@ -106,11 +106,11 @@ class InventoryObject(PgObject):
         self._open_switch_btn.rect.centery = self.rect.top + self.rect.height / 2
         self._open_switch_btn.rect.left = self.rect.right
 
-    def _draw(self, surface, manager):
+    def _draw(self, surface):
         """
         绘制物品槽位
         """
-        super()._draw(surface, manager)
+        super()._draw(surface)
 
         for row, row_list in enumerate(self._item_page):
             for col, item_slot in enumerate(row_list):
@@ -157,31 +157,31 @@ class ItemObject(DraggableObject):
         self.tooltip = tooltip
         self.z_index = ZIndex.dragging_item
 
-    def on_create(self, manager: UIManager):
-        manager.add(self.tooltip)
+    def on_create(self):
+        UIManager.add(self.tooltip)
 
-    def on_remove(self, manager: UIManager):
-        manager.remove(self.tooltip)
+    def on_remove(self):
+        UIManager.remove(self.tooltip)
     
-    def _on_drag_start(self, manager: UIManager) -> bool:
+    def _on_drag_start(self) -> bool:
         self.z_index = ZIndex.dragging_item
-        return super()._on_drag_start(manager)
+        return super()._on_drag_start()
 
-    def _on_drag_end(self, manager: UIManager):
-        super()._on_drag_end(manager)
+    def _on_drag_end(self):
+        super()._on_drag_end()
 
-    def _handle_event(self, event, manager):
-        for inv in manager.query(InventoryObject):
+    def _handle_event(self, event):
+        for inv in UIManager.query(InventoryObject):
             if self.z_index == ZIndex.static_item and inv.rect.collidepoint(pygame.mouse.get_pos()):
                 return False
-        return super()._handle_event(event, manager)
+        return super()._handle_event(event)
 
-    def _update(self, manager):
-        for inv in manager.query(InventoryObject):
+    def _update(self):
+        for inv in UIManager.query(InventoryObject):
             if self.z_index == ZIndex.static_item and inv.rect.collidepoint(pygame.mouse.get_pos()):
                 self.tooltip.visible = False
                 return
-        super()._update(manager)
+        super()._update()
 
         # 只有不被拖动以及鼠标在自身时才显示 tooltip
 
@@ -211,13 +211,13 @@ class ItemSlotObject(DraggableObject):
         self._takeable = True
         self._take_out_num = 1  # 除非调试不然不要改这个！！！
 
-    def on_create(self, manager: UIManager):
-        manager.add(self.tooltip)
+    def on_create(self):
+        UIManager.add(self.tooltip)
 
-    def on_remove(self, manager: UIManager):
-        manager.remove(self.tooltip)
+    def on_remove(self):
+        UIManager.remove(self.tooltip)
 
-    def _on_drag_start(self, manager: UIManager) -> bool:
+    def _on_drag_start(self) -> bool:
         if self._takeable and (self.render_clip is None or self.render_clip.collidepoint(pygame.mouse.get_pos())):
             take_out_item = ItemObject(
                 (0, 0, 48, 48),
@@ -226,19 +226,19 @@ class ItemSlotObject(DraggableObject):
                 color=CYAN
             )
             take_out_item.holding = True
-            manager.add(take_out_item)
+            UIManager.add(take_out_item)
             self.num -= self._take_out_num
             # print(f'从 {self.color} 获取了 {take_out_item.color}')
             return True
 
         return False  # 否则不允许开始拖拽
 
-    def _handle_event(self, event, manager):
+    def _handle_event(self, event):
         if self.render_clip.collidepoint(pygame.mouse.get_pos()) or self.holding:
-            return super()._handle_event(event, manager)
+            return super()._handle_event(event)
         return False
 
-    def _on_drag_end(self, manager: UIManager) -> None:
+    def _on_drag_end(self) -> None:
         # todo! 话又说回来了，我觉得应该加一个滚轮来应对物品很多的情况，其他例如文本在超出self.rect时候也可以用这个滚轮，mixin？遮罩？
         if self.holding:
             if self.item.num - self._take_out_num >= 0:
@@ -246,7 +246,7 @@ class ItemSlotObject(DraggableObject):
             else:
                 raise ValueError("物品数量不足")
 
-    def _update(self, manager):
+    def _update(self):
         # 只有不被拖动以及鼠标在自身时才显示 tooltip
         mouse_pos = pygame.mouse.get_pos()
         mouse_pressed = pygame.mouse.get_pressed()[0]
@@ -258,8 +258,8 @@ class ItemSlotObject(DraggableObject):
                 and (self.render_clip is None or self.render_clip.collidepoint(mouse_pos))
         )
 
-    def _draw(self, surface, manager):
-        super()._draw(surface, manager)
+    def _draw(self, surface):
+        super()._draw(surface)
         font_s = self.font.render(str(self.num), True, BLACK)
         font_rect = font_s.get_rect()
         font_rect.bottomleft = self.rect.bottomleft
@@ -277,13 +277,13 @@ class ItemDestroyObject(PgObject):
 
         self.num = 0
 
-    def _handle_event(self, event, manager):
+    def _handle_event(self, event):
         if event.type == pygame.MOUSEBUTTONUP:
-            items: list[ItemObject] = manager.query(ItemObject)
+            items: list[ItemObject] = UIManager.query(ItemObject)
 
             for item in items:
                 if self.rect.collidepoint(item.rect.center):
                     self.num += 1
                     print(f'我销毁了 {item.color}')
-                    manager.remove(item)
+                    UIManager.remove(item)
 

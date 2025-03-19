@@ -1,7 +1,7 @@
 from gui.base import *
 from gui.config import *
 from gui.screens.item import InventoryObject
-from gui.manager import UIManager
+from gui.manager.ui import UIManager
 from gui.screens.debug import GUIDebug
 
 from core.main import *
@@ -40,8 +40,8 @@ inv = Inventory(
 )
 inv_mgr = InventoryObject((0, 64, 232, 306), inv)
 debug_info = GUIDebug()
-ui = UIManager(clock)
-ui.add(inv_mgr, debug_info)
+UIManager(clock)
+UIManager.add(inv_mgr, debug_info)
 
 # 我的变量定义结束
 
@@ -50,19 +50,19 @@ while running:
     # print(ui._frames)
     # ==== 按键输入 ====
     for event in pygame.event.get():
-        ui.handle_event(event)
+        UIManager.handle_event(event)
 
         if event.type == pygame.QUIT:
             logger.info(f'GUI 终止')
             running = False
 
     # ==== 逻辑更新 ====
-    ui.update()
+    UIManager.update()
 
     # ==== 绘制部分 ====
     screen.fill(BLACK)
     # 开始绘制
-    ui.draw(screen)
+    UIManager.draw(screen)
 
     # 绘制结束
     pygame.display.flip()

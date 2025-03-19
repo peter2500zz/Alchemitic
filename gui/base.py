@@ -1,12 +1,6 @@
-from __future__ import annotations
 import pygame
 
 from gui.config import *
-
-from typing import TYPE_CHECKING
-if TYPE_CHECKING:
-    # 可能有一些耦合度问题
-    from gui.manager import UIManager
 
 
 class PgObject(object):
@@ -26,38 +20,37 @@ class PgObject(object):
         self.z_index = ZIndex.objects
         self.render_clip = render_clip
 
-    def on_create(self, manager: UIManager):
-        return self._on_create(manager)
+    def on_create(self):
+        return self._on_create()
 
-    def _on_create(self, manager: UIManager):
+    def _on_create(self):
         """
         在实例创建时调用此方法
         """
         pass
 
-    def on_remove(self, manager: UIManager):
-        return self._on_remove(manager)
+    def on_remove(self):
+        return self._on_remove()
 
-    def _on_remove(self, manager: UIManager):
+    def _on_remove(self):
         """
         在实例销毁时调用此方法
         """
         pass
 
-    def handle_event(self, event: pygame.event.Event, manager: UIManager) -> bool:
+    def handle_event(self, event: pygame.event.Event) -> bool:
         """
         pygame接收到用户输入时将event提交给obj处理
         有些obj会直接消费这个event，以防止其他obj处理之后冲突
 
         :param event: 游戏事件
-        :param manager: UIManager实例，用于查询或者操作其他obj
         :return: 如果为真则会消费此事件，其他obj无法继续响应
         """
         if not self.active:
             return False
-        return self._handle_event(event, manager)
+        return self._handle_event(event)
 
-    def _handle_event(self, event: pygame.event.Event, manager: UIManager) -> bool:
+    def _handle_event(self, event: pygame.event.Event) -> bool:
         """
         游戏窗口接收到输入时调用此方法
 
@@ -65,33 +58,33 @@ class PgObject(object):
         """
         pass
 
-    def update(self, manager: UIManager) -> None:
+    def update(self) -> None:
         """
         游戏更新时obj需要处理一些事情
         比如物理obj可以趁机用加速度更新自己的速度
         """
         if not self.active:
             return
-        return self._update(manager)
+        return self._update()
 
-    def _update(self, manager: UIManager) -> None:
+    def _update(self) -> None:
         """
         游戏更新时调用此方法
         """
         pass
 
-    def draw(self, surface: pygame.Surface, manager: UIManager) -> None:
+    def draw(self, surface: pygame.Surface) -> None:
         """
         将自己绘制在屏幕上的方法
         """
         if not self.visible:  # todo! 不确定是否要一起判断 active
             return
         surface.set_clip(self.render_clip)
-        tmp = self._draw(surface, manager)
+        tmp = self._draw(surface)
         surface.set_clip(None)
         return tmp
 
-    def _draw(self, surface: pygame.Surface, manager: UIManager) -> None:
+    def _draw(self, surface: pygame.Surface) -> None:
         """
         游戏刷新画面时调用此方法
         """
@@ -113,7 +106,7 @@ class DraggableObject(PgObject):
         self._mouse_offset = (0, 0)  # 拖拽相对鼠标的偏移
         self.z_index = ZIndex.dragging
 
-    def _handle_event(self, event, manager):
+    def _handle_event(self, event):
         """
         不强制子类重写，简化代码，转而调用 drag 的两个 hook 方法
 
@@ -128,17 +121,17 @@ class DraggableObject(PgObject):
                     event.pos[0] - self.rect.centerx,
                     event.pos[1] - self.rect.centery
                 )
-                self.holding = self._on_drag_start(manager)
+                self.holding = self._on_drag_start()
                 # if self.holding is None: self.holding = True
                 return True  # 如果确认可以开始被拖拽，则消费这一次event防止多个物品被拖拽
 
         elif event.type == pygame.MOUSEBUTTONUP:
             # 当正在被拖动且松开设定的键时释放
             if self.holding and event.button == self._drag_tigger_key:
-                self._on_drag_end(manager)
+                self._on_drag_end()
                 self.holding = False
 
-    def _on_drag_start(self, manager: UIManager) -> bool:
+    def _on_drag_start(self) -> bool:
         """
         在开始拖拽时触发
 
@@ -147,15 +140,15 @@ class DraggableObject(PgObject):
         return True
 
 
-    def _on_drag_end(self, manager: UIManager) -> None:
+    def _on_drag_end(self) -> None:
         """
         在结束拖拽时触发
         """
         pass
 
-    def _update(self, manager):
+    def _update(self):
         """
-        默认跟随鼠标拖动，子类如果重写想要复用逻辑也许可以直接 super()._update(self, manager)
+        默认跟随鼠标拖动，子类如果重写想要复用逻辑也许可以直接 super()._update(self)
         """
         # 如果正在被拖拽则更新自己的位置到鼠标（还有偏移）
         if self.holding:
@@ -178,7 +171,7 @@ class BtnObject(PgObject):
         self.args = args if args else []
         self.kwargs = kwargs if kwargs else {}
 
-    def _handle_event(self, event, manager):
+    def _handle_event(self, event):
         """
         当按下时候调用 _on_clicked hook 方法
         """
@@ -216,7 +209,7 @@ class TextObject(PgObject):
         self.reverse_v = reverse_v
         self.reverse_h = reverse_h
 
-    def _draw(self, surface: pygame.Surface, manager: UIManager) -> None:
+    def _draw(self, surface: pygame.Surface) -> None:
         split_text = self.text.split('\n')
         offset_y = 0
         for text in split_text:

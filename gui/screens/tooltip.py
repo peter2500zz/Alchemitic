@@ -2,6 +2,7 @@ import pygame
 
 from gui.base import PgObject
 from gui.config import *
+from gui.manager.ui import UIManager
 
 
 class ToolTipObject(PgObject):
@@ -15,8 +16,8 @@ class ToolTipObject(PgObject):
         self.z_index = ZIndex.tooltip
         self.visible = False
 
-    def _draw(self, surface, manager):
-        for tooltip in manager.query(ToolTipObject):
+    def _draw(self, surface):
+        for tooltip in UIManager.query(ToolTipObject):
             if tooltip is self:
                 continue
             if tooltip.visible:
