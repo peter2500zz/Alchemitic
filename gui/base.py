@@ -163,13 +163,16 @@ class BtnObject(PgObject):
     """
     按钮obj类
     """
-    def __init__(self, rect, func, args: list = None, kwargs: dict = None, *, color=BLACK):
+    def __init__(self, rect, func, args: list = None, kwargs: dict = None, *, color=BLACK, text=''):
         super().__init__(rect, color=color)
 
         self.pressed = False
         self.func = func
         self.args = args if args else []
         self.kwargs = kwargs if kwargs else {}
+        self.text = text
+
+        self.font = pygame.font.SysFont(FONTS, 20)
 
     def _handle_event(self, event):
         """
@@ -196,6 +199,13 @@ class BtnObject(PgObject):
         按下的定义在 _handle_event 里
         """
         return self.func(*self.args, **self.kwargs)
+
+    def _draw(self, surface: pygame.Surface) -> None:
+        super()._draw(surface)
+        text = self.font.render(self.text, True, WHITE)
+        text_rect = text.get_rect()
+        text_rect.topleft = self.rect.topleft
+        surface.blit(text, text_rect)
 
 
 class TextObject(PgObject):

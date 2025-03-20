@@ -1,8 +1,9 @@
 from gui.base import *
 from gui.config import *
 from gui.managers.tooltip import ToolTipManager
-from gui.screens.item import InventoryObject
 from gui.managers.ui import UIManager
+from gui.screens.item import InventoryObject
+from gui.screens.crucible import CrucibleObject
 from gui.screens.debug import GUIDebug
 
 from core.main import *
@@ -40,10 +41,11 @@ inv = Inventory(
     Vacuos(1),
 )
 inv_mgr = InventoryObject((0, 64, 232, 306), inv)
+crucible = CrucibleObject(Crucible(standard_alchemy_recipes))
 debug_info = GUIDebug()
 UIManager(clock)
 ToolTipManager.init()
-UIManager.add(inv_mgr, debug_info)
+UIManager.add(inv_mgr, debug_info, crucible)
 
 # 我的变量定义结束
 

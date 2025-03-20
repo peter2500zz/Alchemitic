@@ -105,6 +105,8 @@ class ToolTipManager:
 
         for obj in UIManager.query():
             # 检查对象是否可见且包含鼠标
+            if obj is cls.tooltip:
+                continue
 
             if not obj.visible:
                 continue

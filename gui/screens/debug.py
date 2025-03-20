@@ -1,7 +1,10 @@
-from gui.base import *
+import pygame
+
+from gui.base import TextObject, PgObject
 from gui.screens.item import InventoryObject
+from gui.screens.crucible import CrucibleObject
 from gui.managers.ui import UIManager
-from gui.config import DebugMark
+from gui.config import *
 
 class InfoDebug(TextObject, DebugMark):
     def __init__(self):
@@ -15,8 +18,9 @@ class InfoDebug(TextObject, DebugMark):
         this_frame = UIManager._frames[UIManager._current_frame]
 
         text = [
-            f'objects: {len(this_frame)} -> {", ".join([i.__class__.__name__ for i in this_frame if i.rect.collidepoint(pygame.mouse.get_pos()) and 'debug' not in i.__class__.__name__.lower()])}',
+            f'objects: {len([i for i in this_frame if not isinstance(i, DebugMark)])} -> {", ".join([i.__class__.__name__ for i in this_frame if i.rect.collidepoint(pygame.mouse.get_pos()) and not isinstance(i, DebugMark)])}',
             f'inv: {[{res.name: res.num for res in inv.inv.export()} for inv in UIManager.query(InventoryObject)]}',
+            f'cru: {[{res.name: res.num for res in cru.crucible.inventory.export()} for cru in UIManager.query(CrucibleObject)]}',
             f'mouse_pos: {pygame.mouse.get_pos()}',
             f'fps: {UIManager.clock.get_fps():.2f}',
             # f'pages: {[inv._current_page for inv in UIManager.query(InventoryObject)]}',

@@ -34,7 +34,8 @@ class UIManager:
     def remove(cls, *objs: PgObject, frame: str = 'main'):
         for obj in objs:
             obj.on_remove()
-            cls._frames[frame].remove(obj)  # todo! 如果输入的类实例不存在的话那将会出错
+            cls._frames[frame].remove(obj)
+            del obj
 
     @classmethod
     def handle_event(cls, event: pygame.event.Event):

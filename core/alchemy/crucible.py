@@ -11,7 +11,7 @@ class Crucible:
         self.base = CrucibleBase.water
         self._recipes = recipes
 
-    def add(self, *resources: Item | Aspect) -> list[Item]:
+    def add(self, *resources: Resource) -> list[Item]:
         results = []
         for resource in resources:
             # 不管是要素还是物品先直接加到锅里再说
