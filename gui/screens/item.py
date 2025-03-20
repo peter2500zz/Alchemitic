@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from gui.base import *
 from gui.config import *
-from gui.screens.tooltip import ToolTipObject
-from gui.manager.ui import UIManager
+from gui.managers.tooltip import ToolTipManager
+from gui.managers.ui import UIManager
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -150,7 +150,7 @@ class ItemObject(DraggableObject):
     """
     被拿出来的物品
     """
-    def __init__(self, rect, item: Resource, tooltip: ToolTipObject, *, color=BLACK):
+    def __init__(self, rect, item: Resource, tooltip: list, *, color=BLACK):
         super().__init__(rect, color=color)
 
         self.item = item
@@ -158,10 +158,10 @@ class ItemObject(DraggableObject):
         self.z_index = ZIndex.dragging_item
 
     def on_create(self):
-        UIManager.add(self.tooltip)
+        ToolTipManager.register(self, self.tooltip[0], self.tooltip[1])
 
     def on_remove(self):
-        UIManager.remove(self.tooltip)
+        ToolTipManager.unregister(self)
     
     def _on_drag_start(self) -> bool:
         self.z_index = ZIndex.dragging_item
@@ -176,20 +176,6 @@ class ItemObject(DraggableObject):
                 return False
         return super()._handle_event(event)
 
-    def _update(self):
-        for inv in UIManager.query(InventoryObject):
-            if self.z_index == ZIndex.static_item and inv.rect.collidepoint(pygame.mouse.get_pos()):
-                self.tooltip.visible = False
-                return
-        super()._update()
-
-        # 只有不被拖动以及鼠标在自身时才显示 tooltip
-
-        if self.rect.collidepoint(pygame.mouse.get_pos()) and not self.holding and not pygame.mouse.get_pressed()[0]:
-            self.tooltip.visible = True
-        else:
-            self.tooltip.visible = False
-
 
 class ItemSlotObject(DraggableObject):
     """
@@ -202,7 +188,7 @@ class ItemSlotObject(DraggableObject):
         self.z_index = ZIndex.item_slot
         self.item: Resource = item
         self.num = item.num
-        self.tooltip = ToolTipObject(self.item.name, self.item.description, color=WHITE)
+        # self.tooltip = ToolTipObject(self.item.name, self.item.description, color=WHITE)
         # print(self.tooltip)
 
         self._font_size = 24
@@ -212,17 +198,17 @@ class ItemSlotObject(DraggableObject):
         self._take_out_num = 1  # 除非调试不然不要改这个！！！
 
     def on_create(self):
-        UIManager.add(self.tooltip)
+        ToolTipManager.register(self, self.item.name, self.item.description)
 
     def on_remove(self):
-        UIManager.remove(self.tooltip)
+        ToolTipManager.unregister(self)
 
     def _on_drag_start(self) -> bool:
         if self._takeable and (self.render_clip is None or self.render_clip.collidepoint(pygame.mouse.get_pos())):
             take_out_item = ItemObject(
                 (0, 0, 48, 48),
                 type(self.item)(self._take_out_num),
-                ToolTipObject(self.item.name, self.item.description, color=WHITE),
+                [self.item.name, self.item.description],
                 color=CYAN
             )
             take_out_item.holding = True
@@ -251,12 +237,12 @@ class ItemSlotObject(DraggableObject):
         mouse_pos = pygame.mouse.get_pos()
         mouse_pressed = pygame.mouse.get_pressed()[0]
 
-        self.tooltip.visible = (
-                self.rect.collidepoint(mouse_pos)
-                and not self.holding
-                and not mouse_pressed
-                and (self.render_clip is None or self.render_clip.collidepoint(mouse_pos))
-        )
+        # self.tooltip.visible = (
+        #         self.rect.collidepoint(mouse_pos)
+        #         and not self.holding
+        #         and not mouse_pressed
+        #         and (self.render_clip is None or self.render_clip.collidepoint(mouse_pos))
+        # )
 
     def _draw(self, surface):
         super()._draw(surface)

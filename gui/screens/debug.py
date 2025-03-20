@@ -1,9 +1,9 @@
 from gui.base import *
 from gui.screens.item import InventoryObject
-from gui.manager.ui import UIManager
+from gui.managers.ui import UIManager
+from gui.config import DebugMark
 
-
-class InfoDebug(TextObject):
+class InfoDebug(TextObject, DebugMark):
     def __init__(self):
         self.text = ""
         super().__init__(self.text, reverse_v=True)
@@ -26,13 +26,13 @@ class InfoDebug(TextObject):
     def _draw(self, surface: pygame.Surface) -> None:
         super()._draw(surface)
 
-        for o in UIManager._frames[UIManager._current_frame]:
+        for o in UIManager.query():
             if 'debug' not in o.__class__.__name__.lower():
-                pygame.draw.rect(surface, MAGENTA, o.rect, 2)
+                pygame.draw.rect(surface, MAGENTA, o.rect, 1)
                 if o.rect.collidepoint(pygame.mouse.get_pos()):
-                    pygame.draw.rect(surface, GREEN, o.rect, 2)
+                    pygame.draw.rect(surface, GREEN, o.rect, 1)
 
-class ObjectDebug(TextObject):
+class ObjectDebug(TextObject, DebugMark):
     def __init__(self):
         self.text = ""
         super().__init__(self.text, reverse_h=True, reverse_v=True)
@@ -45,7 +45,7 @@ class ObjectDebug(TextObject):
         self.text = '\n'.join(text)
 
 
-class GUIDebug(PgObject):
+class GUIDebug(PgObject, DebugMark):
     def __init__(self):
         super().__init__()
         self.debug = [InfoDebug()]#, ObjectDebug()]

@@ -1,10 +1,7 @@
-from __future__ import annotations
 import pygame
 
-from typing import TYPE_CHECKING
-if TYPE_CHECKING:
-    # 可能有一些耦合度问题
-    from gui.base import PgObject
+from gui.config import DebugMark
+from gui.base import PgObject
 
 
 class UIManager:
@@ -70,9 +67,11 @@ class UIManager:
         参考bevy的query，这样的搜索机制看起来不错
         """
         result = []
-        if query_class:
-            for obj in cls._frames.get(frame, []):
-                if isinstance(obj, query_class):
-                    result.append(obj)
+        if not query_class:
+            query_class = PgObject
+
+        for obj in cls._frames.get(frame, []):
+            if isinstance(obj, query_class) and not isinstance(obj, DebugMark):
+                result.append(obj)
         return result
 

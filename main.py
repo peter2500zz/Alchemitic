@@ -1,7 +1,8 @@
 from gui.base import *
 from gui.config import *
+from gui.managers.tooltip import ToolTipManager
 from gui.screens.item import InventoryObject
-from gui.manager.ui import UIManager
+from gui.managers.ui import UIManager
 from gui.screens.debug import GUIDebug
 
 from core.main import *
@@ -41,6 +42,7 @@ inv = Inventory(
 inv_mgr = InventoryObject((0, 64, 232, 306), inv)
 debug_info = GUIDebug()
 UIManager(clock)
+ToolTipManager.init()
 UIManager.add(inv_mgr, debug_info)
 
 # 我的变量定义结束
@@ -57,6 +59,7 @@ while running:
             running = False
 
     # ==== 逻辑更新 ====
+    ToolTipManager.update()
     UIManager.update()
 
     # ==== 绘制部分 ====

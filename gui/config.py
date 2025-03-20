@@ -1,5 +1,8 @@
 from enum import Enum
 
+class DebugMark:
+    pass
+
 class ZIndex(Enum):
     backgrounds = 0
     objects = 10
