@@ -14,15 +14,16 @@ if TYPE_CHECKING:
 class CrucibleObject(PgObject):
 
     def __init__(self, crucible: Crucible):
-        super().__init__((330, 110, 128, 128), color=YELLOW)
+        self.rect = pygame.Rect((330, 110, 128, 128))
+        self.color = YELLOW
 
         self.crucible = crucible
 
         self._init_btn()
 
     def _init_btn(self):
-        self._dealch_btn = BtnObject((330, 240, 64, 32), self._dealch, color=RED, text='加热')
-        self._reaction_btn = BtnObject((394, 240, 64, 32), self._reaction, color=BLUE, text='搅拌')
+        self._dealch_btn = BtnObject(pygame.Rect((330, 240, 64, 32)), self._dealch, color=RED, text='加热')
+        self._reaction_btn = BtnObject(pygame.Rect((394, 240, 64, 32)), self._reaction, color=BLUE, text='搅拌')
 
         self._btns = [self._dealch_btn, self._reaction_btn]
 
@@ -47,7 +48,7 @@ class CrucibleObject(PgObject):
     def _reaction(self):
         new_aspect_createc, item_created = self.crucible.reaction()
         for i, item in enumerate(item_created):
-            UIManager.add(ItemObject((330 + 50 * i, 34, 48, 48), item, color=CYAN))
+            UIManager.add(ItemObject(pygame.Rect((330 + 50 * i, 34, 48, 48)), item, color=CYAN))
 
 
 

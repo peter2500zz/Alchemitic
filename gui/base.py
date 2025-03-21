@@ -1,5 +1,6 @@
 import pygame
 
+from gui.assets import AssetsLoader
 from gui.config import *
 
 
@@ -11,14 +12,14 @@ class PgObject(object):
         update()
         draw()
     """
-    def __init__(self, rect=pygame.Rect(0, 0, 0, 0), *, color=BLACK, render_clip: pygame.Rect = None):
-        self.rect = pygame.Rect(rect)  # 自身的rect
-        self.color = color  # 无图片时绘制的纯色色块
-        self.active = True  # 是否更新逻辑
-        self.visible = True  # 是否可见
+    rect: pygame.Rect = pygame.Rect(0, 0, 0, 0)
+    active = True  # 是否更新逻辑
+    visible = True  # 是否可见
 
-        self.z_index = ZIndex.objects
-        self.render_clip = render_clip
+    render_clip: pygame.Rect = None
+    z_index = ZIndex.objects
+    color = BLACK
+    img = ''
 
     def on_create(self):
         return self._on_create()
@@ -77,7 +78,7 @@ class PgObject(object):
         """
         将自己绘制在屏幕上的方法
         """
-        if not self.visible:  # todo! 不确定是否要一起判断 active
+        if not self.visible:
             return
         surface.set_clip(self.render_clip)
         tmp = self._draw(surface)
@@ -88,7 +89,10 @@ class PgObject(object):
         """
         游戏刷新画面时调用此方法
         """
-        pygame.draw.rect(surface, self.color, self.rect)
+        if self.img:
+            surface.blit(pygame.transform.scale(AssetsLoader.get(self.img), (self.rect.width, self.rect.height)), self.rect.topleft)
+        else:
+            pygame.draw.rect(surface, self.color, self.rect)
 
 
 class DraggableObject(PgObject):
@@ -96,9 +100,7 @@ class DraggableObject(PgObject):
     可拖动物体类
     设想情况下鼠标点击实例开始拖动，松开则停止
     """
-    def __init__(self, rect, *, color=BLACK, render_clip: pygame.Rect = None):
-        super().__init__(rect, color=color, render_clip=render_clip)
-
+    def __init__(self):
         # 有关拖拽的判定
         self._drag_tigger_key: int = 1  # 触发拖拽与释放的鼠标按钮 todo! 可能需要区分开始和结束拖拽的按键
         self.can_be_dragged = True  # 是否可以被拖拽
@@ -163,8 +165,9 @@ class BtnObject(PgObject):
     """
     按钮obj类
     """
-    def __init__(self, rect, func, args: list = None, kwargs: dict = None, *, color=BLACK, text=''):
-        super().__init__(rect, color=color)
+    def __init__(self, rect: pygame.Rect, func, args: list = None, kwargs: dict = None, *, color=BLACK, text=''):
+        self.rect = rect
+        self.color = color
 
         self.pressed = False
         self.func = func
@@ -209,8 +212,8 @@ class BtnObject(PgObject):
 
 
 class TextObject(PgObject):
-    def __init__(self, text: str, font_size: int = 14, rect=(0, 0, *WINDOW_SIZE), reverse_v=False, reverse_h=False):
-        super().__init__(rect)
+    def __init__(self, text: str, font_size: int = 14, rect=pygame.Rect((0, 0, *WINDOW_SIZE)), reverse_v=False, reverse_h=False):
+        self.rect = rect
 
         self.text = text
         self.font = pygame.font.SysFont(FONTS, font_size)

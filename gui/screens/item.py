@@ -1,9 +1,12 @@
 from __future__ import annotations
 
+import pygame
+
 from gui.base import *
 from gui.config import *
 from gui.managers.tooltip import ToolTipManager
 from gui.managers.ui import UIManager
+from gui.assets import AssetsLoader
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -18,12 +21,13 @@ class InventoryObject(PgObject):
     """
     ITEM_SLOT_SIZE: int = 64
 
-    def __init__(self, rect, inv: Inventory):
-        super().__init__(rect, color=GREY)
+    def __init__(self, rect: pygame.Rect, inv: Inventory):
+        self.rect = rect
+        self.color = GREY
         self.z_index = ZIndex.ui
         self._open = False
         self.inv = inv
-        self.item_slot_rect = (-99999, -99999, self.ITEM_SLOT_SIZE, self.ITEM_SLOT_SIZE)  # 物品的大小
+        self.item_slot_rect = pygame.Rect((-99999, -99999, self.ITEM_SLOT_SIZE, self.ITEM_SLOT_SIZE)) # 物品的大小
 
         self._slot_gap = 10  # px
         self._max_item_row = 4
@@ -33,7 +37,7 @@ class InventoryObject(PgObject):
         self._solt_render_clip = self.rect.copy()
         self._solt_render_clip.top += self._slot_gap
         self._solt_render_clip.height -= self._slot_gap * 2
-        self.item_slots = {type(res): ItemSlotObject(self.item_slot_rect, res, render_clip=self._solt_render_clip) for res in inv.export()}
+        self.item_slots = {type(res): ItemSlotObject(self.item_slot_rect.copy(), res, render_clip=self._solt_render_clip) for res in inv.export()}
 
         self._item_page = self._calc_item_table()
         self._rolling_offset = 0
@@ -44,7 +48,7 @@ class InventoryObject(PgObject):
 
 
     def _init_btn(self):
-        self._open_switch_btn = BtnObject((-99999, -99999, 16, 64), self._switch_open, color=RED)
+        self._open_switch_btn = BtnObject(pygame.Rect((-99999, -99999, 16, 64)), self._switch_open, color=RED)
         self._open_switch_btn.z_index = ZIndex.ui
 
         self._btns = [self._open_switch_btn]
@@ -99,7 +103,7 @@ class InventoryObject(PgObject):
             for item_slot in self.item_slots.values():
                 UIManager.remove(item_slot)
             # 重新初始化新的物品槽
-            self.item_slots = {type(res): ItemSlotObject(self.item_slot_rect, res, render_clip=self._solt_render_clip) for res in self.inv.export()}
+            self.item_slots = {type(res): ItemSlotObject(self.item_slot_rect.copy(), res, render_clip=self._solt_render_clip) for res in self.inv.export()}
             for item_slot in self.item_slots.values():
                 UIManager.add(item_slot)
         # 重新计算物品的显示位置
@@ -111,7 +115,7 @@ class InventoryObject(PgObject):
         elif self._rolling_offset > self._slot_gap + (self._slot_gap + self.ITEM_SLOT_SIZE) * len(self._item_page) - self.rect.height and len(self._item_page) >= self._max_item_row:
             self._rolling_offset = self._slot_gap + (self._slot_gap + self.ITEM_SLOT_SIZE) * len(self._item_page) - self.rect.height
 
-        self._open_switch_btn.rect.centery = self.rect.top + self.rect.height / 2
+        self._open_switch_btn.rect.centery = self.rect.top + self.rect.height // 2
         self._open_switch_btn.rect.left = self.rect.right
 
     def _draw(self, surface):
@@ -158,10 +162,13 @@ class ItemObject(DraggableObject):
     """
     被拿出来的物品
     """
-    def __init__(self, rect, item: Resource, *, color=BLACK):
-        super().__init__(rect, color=color)
+    def __init__(self, rect: pygame.Rect, item: Resource, *, color=BLACK):
+        super().__init__()
+        self.rect = rect
+        self.color = color
 
         self.item = item
+        self.img = self.item.img
         self.z_index = ZIndex.dragging_item
 
     def on_create(self):
@@ -189,11 +196,15 @@ class ItemSlotObject(DraggableObject):
     单个物品的库存位
     可以用于展示物品或者从中拖拽出物品实例
     """
-    def __init__(self, rect, item: Resource, *, color=WHITE, render_clip: pygame.Rect = None):
-        super().__init__(rect, color=color, render_clip=render_clip)
+    def __init__(self, rect: pygame.Rect, item: Resource, *, color=WHITE, render_clip: pygame.Rect = None):
+        super().__init__()
+        self.rect = rect
+        self.color = color
+        self.render_clip = render_clip
 
         self.z_index = ZIndex.item_slot
         self.item: Resource = item
+        self.img = self.item.img
         self.num = item.num
         # self.tooltip = ToolTipObject(self.item.name, self.item.description, color=WHITE)
         # print(self.tooltip)
@@ -213,7 +224,7 @@ class ItemSlotObject(DraggableObject):
     def _on_drag_start(self) -> bool:
         if self._takeable and (self.render_clip is None or self.render_clip.collidepoint(pygame.mouse.get_pos())):
             take_out_item = ItemObject(
-                (0, 0, 48, 48),
+                pygame.Rect((0, 0, 48, 48)),
                 type(self.item)(self._take_out_num),
                 color=CYAN
             )

@@ -7,7 +7,7 @@ from gui.managers.ui import UIManager
 
 class ToolTipObject(PgObject):
     def __init__(self, title: str = '标题',desc: str = '描述', *, color=BLACK):
-        super().__init__(color=color)
+        self.color = color
         self.title = title
         self.desc: list[str] = desc.split('\n')
         self._font_size = 16
@@ -116,7 +116,7 @@ class ToolTipManager:
                 if hasattr(obj, 'render_clip') and obj.render_clip and not obj.render_clip.collidepoint(mouse_pos):
                     continue
 
-                if obj.z_index.value > highest_z:
+                if obj.z_index.value >= highest_z:
                     highest_z = obj.z_index.value
                     highest_z_object = obj
 

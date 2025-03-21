@@ -1,3 +1,7 @@
+import pygame
+
+from core.main import *
+
 from gui.base import *
 from gui.config import *
 from gui.managers.tooltip import ToolTipManager
@@ -5,8 +9,7 @@ from gui.managers.ui import UIManager
 from gui.screens.item import InventoryObject
 from gui.screens.crucible import CrucibleObject
 from gui.screens.debug import GUIDebug
-
-from core.main import *
+from gui.assets import AssetsLoader, standard_assets
 
 logger = new_logger('GUI')
 
@@ -26,7 +29,7 @@ inv = Inventory(
     Stone(5),
     WaterLotus(3),
     StoneBrick(1),
-    Feather(1),
+    Feather(2),
     Gravel(1),
     Coal(1),
     Ignis(1),
@@ -40,11 +43,12 @@ inv = Inventory(
     Motus(1),
     Vacuos(1),
 )
-inv_mgr = InventoryObject((0, 64, 232, 306), inv)
+inv_mgr = InventoryObject(pygame.Rect((0, 64, 232, 306)), inv)
 crucible = CrucibleObject(Crucible(standard_alchemy_recipes))
 debug_info = GUIDebug()
 UIManager(clock)
 ToolTipManager.init()
+AssetsLoader.load(standard_assets)
 UIManager.add(inv_mgr, debug_info, crucible)
 
 # 我的变量定义结束
