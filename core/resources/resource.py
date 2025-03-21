@@ -7,6 +7,7 @@ class Resource(object):
     """
     name = 'unknown'
     description = 'unknown'
+    img = 'unknown'
     category = ResourceCategory.Undefined
 
     def __init__(self, num: int = 1):
@@ -133,6 +134,9 @@ class FlameFlower(Item):
     name = '火焰花'
     description = '被踩到就会自己烧起来的奇怪花朵'
     aspects: list[Aspect] = [Ignis(1)]
+    combustible = True
+    temperature_beilv = 1.5
+    time_beilv = 0.25
 
 
 @resource_register
@@ -146,6 +150,7 @@ class WaterLotus(Item):
 class Feather(Item):
     name = '羽毛'
     description = '从鸟身上拔下的羽毛'
+    img = 'feather'
     aspects: list[Aspect] = [Aer(1)]
 
 
@@ -174,7 +179,11 @@ class Gravel(Item):
 class Coal(Item):
     name = '煤炭'
     description = '普通的煤炭，可以当作燃料来用'
+    img = 'coal'
     aspects: list[Aspect] = [Potentia(1)]
+    combustible = True
+    temperature_beilv = 1
+    time_beilv = 1
 
 
 @resource_register
