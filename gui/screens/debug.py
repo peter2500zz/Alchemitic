@@ -15,7 +15,7 @@ class InfoDebug(TextObject, DebugMark):
         self.rect.bottomleft = (0, WINDOW_SIZE[1])
 
     def _update(self) -> None:
-        this_frame = UIManager._frames[UIManager._current_frame]
+        this_frame = UIManager.query(PgObject)
 
         text = [
             f'objects: {len([i for i in this_frame if not isinstance(i, DebugMark)])} -> {", ".join([i.__class__.__name__ for i in this_frame if i.rect.collidepoint(pygame.mouse.get_pos()) and not isinstance(i, DebugMark)])}',
@@ -36,23 +36,12 @@ class InfoDebug(TextObject, DebugMark):
                 if o.rect.collidepoint(pygame.mouse.get_pos()):
                     pygame.draw.rect(surface, GREEN, o.rect, 1)
 
-class ObjectDebug(TextObject, DebugMark):
-    def __init__(self):
-        self.text = ""
-        super().__init__(self.text, reverse_h=True, reverse_v=True)
-
-    def _on_create(self):
-        self.rect.bottomright = WINDOW_SIZE
-
-    def _update(self) -> None:
-        text = [f'{x}, z-index: {x.z_index.value}' for x in UIManager._frames[UIManager._current_frame]]
-        self.text = '\n'.join(text)
-
 
 class GUIDebug(PgObject, DebugMark):
+    """管理所有Debug组建的类"""
     def __init__(self):
         super().__init__()
-        self.debug = [InfoDebug()]#, ObjectDebug()]
+        self.debug = [InfoDebug()]
 
         self._is_debugging = False
 

@@ -21,7 +21,7 @@ class AssetsLoader:
         return cls._instance
 
     @classmethod
-    def load(cls, assets: dict[str, str]):
+    def init(cls, assets: dict[str, str]):
         if not cls._default_asset:
             # 经典紫黑块
             cls._default_asset = pygame.image.load(io.BytesIO(base64.b64decode('iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAIAAAD91JpzAAAACXBIWXMAAAAnAAAAJwEqCZFPAAAAEklEQVQImWP4z/CfAQL+M/wHABvyA/3mbB67AAAAAElFTkSuQmCC')))

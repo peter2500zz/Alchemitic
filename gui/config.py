@@ -1,9 +1,11 @@
 from enum import Enum
 
 class DebugMark:
+    """继承此标记的类不会被查询到"""
     pass
 
 class ZIndex(Enum):
+    """最高的数值越后被渲染"""
     backgrounds = 0
     objects = 10
     static_item = 19
@@ -27,6 +29,6 @@ YELLOW = (255, 255, 0)
 CYAN = (0, 255, 255)
 MAGENTA = (255, 0, 255)
 
-
+# 窗口尺寸
 WINDOW_SIZE = (800, 450)
 FONTS = ["microsoftyahei", "wqy-zenhei"]

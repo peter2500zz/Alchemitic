@@ -7,7 +7,6 @@ from gui.base import PgObject
 class UIManager:
     """
     用于统一管理obj的类
-    todo? 也许之后要改个名字？ 或者设置一个父类来分别 manage 物体和 UI？
     """
 
     _instance = None
@@ -16,22 +15,27 @@ class UIManager:
         'main': []
     }
     _current_frame = 'main'
-    clock: pygame.time.Clock
+    clock: pygame.time.Clock = None
 
-    def __new__(cls, clock: pygame.time.Clock):
+    def __new__(cls, *args, **kwargs):
         if cls._instance is None:
-            cls.clock = clock
             cls._instance = object.__new__(cls)
         return cls._instance
 
     @classmethod
+    def init(cls, clock: pygame.time.Clock):
+        cls.clock = clock
+
+    @classmethod
     def add(cls, *objs: PgObject, frame: str = 'main'):
+        """向管理器中添加实例"""
         for obj in objs:
             cls._frames[frame].append(obj)
             obj.on_create()
 
     @classmethod
     def remove(cls, *objs: PgObject, frame: str = 'main'):
+        """从管理器中移除实例"""
         for obj in objs:
             obj.on_remove()
             cls._frames[frame].remove(obj)

@@ -6,6 +6,8 @@ from gui.managers.ui import UIManager
 
 
 class ToolTipObject(PgObject):
+    """信息显示类，产生一个悬浮在鼠标周围的提示框"""
+
     def __init__(self, title: str = '标题',desc: str = '描述', *, color=BLACK):
         self.color = color
         self.title = title

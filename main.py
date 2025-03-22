@@ -1,5 +1,3 @@
-import pygame
-
 from core.main import *
 
 from gui.base import *
@@ -12,9 +10,6 @@ from gui.screens.debug import GUIDebug
 from gui.assets import AssetsLoader, standard_assets
 
 logger = new_logger('GUI')
-
-
-# ==== 测试用的类 ====
 
 
 # 初始化及使用示例
@@ -46,9 +41,11 @@ inv = Inventory(
 inv_mgr = InventoryObject(pygame.Rect((0, 64, 232, 306)), inv)
 crucible = CrucibleObject(Crucible(standard_alchemy_recipes))
 debug_info = GUIDebug()
-UIManager(clock)
+
+UIManager.init(clock)
 ToolTipManager.init()
-AssetsLoader.load(standard_assets)
+AssetsLoader.init(standard_assets)
+
 UIManager.add(inv_mgr, debug_info, crucible)
 
 # 我的变量定义结束

@@ -7,7 +7,7 @@ class Resource(object):
     """
     name = 'unknown'
     description = 'unknown'
-    img = 'unknown'
+    img = None
     category = ResourceCategory.Undefined
 
     def __init__(self, num: int = 1):
