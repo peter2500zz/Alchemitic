@@ -33,8 +33,11 @@ class Item(Resource):
 # 定义能用的资源，也就是加了注册装饰器的
 standard_aspects: list[type(Aspect)] = []
 standard_items: list[type(Item)] = []
+standard_assets = {'aduio': [], 'images': []}
 
 def resource_register(cls):  # 资源注册装饰器
+    if img := getattr(cls, 'img'):
+        standard_assets['images'].append(img)
     # 判断资源类型
     if issubclass(cls, Aspect):
         standard_aspects.append(cls)
@@ -133,6 +136,7 @@ class Victus(Aspect):
 class FlameFlower(Item):
     name = '火焰花'
     description = '被踩到就会自己烧起来的奇怪花朵'
+    img = 'flame_flower'
     aspects: list[Aspect] = [Ignis(1)]
 
 
@@ -140,6 +144,7 @@ class FlameFlower(Item):
 class WaterLotus(Item):
     name = '水莲'
     description = '一种生长在水面的莲花'
+    img = 'water_lotus'
     aspects: list[Aspect] = [Aqua(1)]
 
 
@@ -155,6 +160,7 @@ class Feather(Item):
 class Stone(Item):
     name = '石块'
     description = '一块普通的石头'
+    img = 'stone'
     aspects: list[Aspect] = [Terra(1)]
 
 
@@ -162,6 +168,7 @@ class Stone(Item):
 class StoneBrick(Item):
     name = '石砖'
     description = '打磨过的石头'
+    img = 'stone_brick'
     aspects: list[Aspect] = [Terra(1), Ordo(1)]
 
 
@@ -169,6 +176,7 @@ class StoneBrick(Item):
 class Gravel(Item):
     name = '砾石'
     description = '一堆完全碎掉的石头'
+    img = 'gravel'
     aspects: list[Aspect] = [Terra(1), Perditio(1)]
 
 
@@ -184,4 +192,5 @@ class Coal(Item):
 class AlchemyCoal(Item):
     name = '炼金煤炭'
     description = '注入了火元素的煤炭，可以燃烧相当长的时间'
+    img = 'alchemy_coal'
 

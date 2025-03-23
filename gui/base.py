@@ -90,7 +90,7 @@ class PgObject(object):
         游戏刷新画面时调用此方法
         """
         if self.img:
-            surface.blit(pygame.transform.scale(AssetsLoader.get(self.img), (self.rect.width, self.rect.height)), self.rect.topleft)
+            surface.blit(pygame.transform.scale(AssetsLoader.get_image(self.img), (self.rect.width, self.rect.height)), self.rect.topleft)
         else:
             pygame.draw.rect(surface, self.color, self.rect)
 

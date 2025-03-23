@@ -7,7 +7,7 @@ from gui.managers.ui import UIManager
 from gui.screens.item import InventoryObject
 from gui.screens.crucible import CrucibleObject
 from gui.screens.debug import GUIDebug
-from gui.assets import AssetsLoader, standard_assets
+from gui.assets import AssetsLoader
 
 logger = new_logger('GUI')
 
