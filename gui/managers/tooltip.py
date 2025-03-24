@@ -118,7 +118,7 @@ class ToolTipManager:
                 if hasattr(obj, 'render_clip') and obj.render_clip and not obj.render_clip.collidepoint(mouse_pos):
                     continue
 
-                if obj.z_index.value >= highest_z:
+                if obj.z_index.value >= highest_z:# and not isinstance(obj, DebugMark):
                     highest_z = obj.z_index.value
                     highest_z_object = obj
 

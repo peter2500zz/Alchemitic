@@ -15,6 +15,7 @@ class ZIndex(Enum):
     dragging_item = 40
     text = 400
     tooltip = 500
+    int_ui = 200
     debug = 999
 
 

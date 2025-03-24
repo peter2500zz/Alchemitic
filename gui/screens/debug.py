@@ -23,8 +23,9 @@ class InfoDebug(TextObject, DebugMark):
             f'cru: {[{res.name: res.num for res in cru.crucible.inventory.export()} for cru in UIManager.query(CrucibleObject)]}',
             f'mouse_pos: {pygame.mouse.get_pos()}',
             f'fps: {UIManager.clock.get_fps():.2f}',
-            # f'pages: {[inv._current_page for inv in UIManager.query(InventoryObject)]}',
         ]
+        if UIManager._int:
+            text.append(f'INTERRUPTED!!!')
         self.text = '\n'.join(text)
 
     def _draw(self, surface: pygame.Surface) -> None:
@@ -43,11 +44,13 @@ class GUIDebug(PgObject, DebugMark):
         super().__init__()
         self.debug = [InfoDebug()]
 
+        self.z_index = ZIndex.debug
+        self.rect = pygame.Rect(0, 0, 0, 0)
         self._is_debugging = False
 
     def _on_create(self):
         for debug in self.debug:
-            debug.z_index = ZIndex.debug
+            debug.z_index = self.z_index
             UIManager.add(debug)
 
     def _on_remove(self):

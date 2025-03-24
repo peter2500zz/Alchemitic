@@ -1,6 +1,6 @@
 import pygame
 
-from gui.config import DebugMark
+from gui.config import DebugMark, ZIndex
 from gui.base import PgObject
 
 
@@ -14,6 +14,7 @@ class UIManager:
     _frames: dict[str, list[PgObject]] = {
         'main': []
     }
+    _int: list[list[PgObject]] = []
     _current_frame = 'main'
     clock: pygame.time.Clock = None
 
@@ -46,24 +47,41 @@ class UIManager:
         """
         用于将pg接收到的事件下发处理
         """
+        if cls._int:
+            for obj in cls._int[-1]:
+                if obj.handle_event(event):  # 若消费了这个输入事件则中断
+                    return
         for obj in reversed(cls._frames.get(cls._current_frame, [])):  # 倒序来确保最新添加的最先处理输入
+            if cls._int and obj.z_index.value < ZIndex.int_ui.value:
+                continue
+
             if obj.handle_event(event):  # 若消费了这个输入事件则中断
-                break
+                return
 
     @classmethod
     def update(cls):
         """
         遍历更新，目前来讲先加入的先更新
         """
+        if cls._int:
+            for obj in cls._int[-1]:
+                obj.update()
+
         for obj in cls._frames.get(cls._current_frame, []):  # 目前按照顺序更新逻辑
+            if cls._int and obj.z_index.value < ZIndex.int_ui.value:
+                continue
+
             obj.update()
 
     @classmethod
     def draw(cls, screen: pygame.Surface) -> None:
         objs = cls._frames.get(cls._current_frame, [])
-        objs.sort(key=lambda x: x.z_index.value)
+        tmp = objs.copy()
+        if cls._int:
+            tmp.extend([sub_obj for sub_list in cls._int for sub_obj in sub_list])
+        tmp.sort(key=lambda x: x.z_index.value)
         # print(objs)
-        for obj in objs:
+        for obj in tmp:
             obj.draw(screen)
 
     @classmethod
@@ -75,8 +93,19 @@ class UIManager:
         if not query_class:
             query_class = PgObject
 
-        for obj in cls._frames.get(frame, []):
+        tmp = cls._frames.get(frame, []).copy()
+        tmp.extend([sub_obj for sub_list in cls._int for sub_obj in sub_list])
+
+        for obj in tmp:
             if isinstance(obj, query_class) and not isinstance(obj, DebugMark):
                 result.append(obj)
         return result
+
+    @classmethod
+    def interrupt(cls, int_objs: list):
+        cls._int.append(int_objs)
+
+    @classmethod
+    def pop_int(cls):
+        cls._int.pop()
 
