@@ -18,14 +18,14 @@ class InfoDebug(TextObject, DebugMark):
         this_frame = UIManager.query(PgObject)
 
         text = [
-            f'objects: {len([i for i in this_frame if not isinstance(i, DebugMark)])} -> {", ".join([i.__class__.__name__ for i in this_frame if i.rect.collidepoint(pygame.mouse.get_pos()) and not isinstance(i, DebugMark)])}',
+            f'objects: {len([i for i in this_frame if not isinstance(i, DebugMark)])} -> {", ".join([f"{i.__class__.__name__ }({i.z_index.value})" for i in this_frame if i.rect.collidepoint(pygame.mouse.get_pos()) and not isinstance(i, DebugMark)])}',
             f'inv: {[{res.name: res.num for res in inv.inv.export()} for inv in UIManager.query(InventoryObject)]}',
             f'cru: {[{res.name: res.num for res in cru.crucible.inventory.export()} for cru in UIManager.query(CrucibleObject)]}',
             f'mouse_pos: {pygame.mouse.get_pos()}',
             f'fps: {UIManager.clock.get_fps():.2f}',
         ]
         if UIManager._int:
-            text.append(f'INTERRUPTED!!!')
+            text.append(f'INTERRUPTED!!! ({len(UIManager._int)})')
         self.text = '\n'.join(text)
 
     def _draw(self, surface: pygame.Surface) -> None:

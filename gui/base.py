@@ -165,9 +165,10 @@ class BtnObject(PgObject):
     """
     按钮obj类
     """
-    def __init__(self, rect: pygame.Rect, func, args: list = None, kwargs: dict = None, *, color=BLACK, text=''):
+    def __init__(self, rect: pygame.Rect, func, args: list = None, kwargs: dict = None, *, color=BLACK, text='', z_index=ZIndex.ui):
         self.rect = rect
         self.color = color
+        self.z_index = z_index
 
         self.pressed = False
         self.func = func

@@ -13,17 +13,11 @@ logger = new_logger('GUI')
 
 
 # ==== 测试 ====
-class TestBtn(BtnObject):
-    z_index = ZIndex.int_ui
-
-    def __init__(self, rect, func, args=None):
-        super().__init__(rect, func, args)
-
-        self.color = RED
+from gui.screens.popup import ConfirmBox
 
 def interrupt():
     print('interrupt')
-    UIManager.interrupt([TestBtn(pygame.Rect(0, 0, 100, 100), UIManager.pop_int)])
+    UIManager.add(ConfirmBox())
 
 # 初始化及使用示例
 logger.info(f'初始化 GUI')
@@ -59,7 +53,7 @@ UIManager.init(clock)
 ToolTipManager.init()
 AssetsLoader.init(standard_assets)
 
-UIManager.add(inv_mgr, debug_info, crucible, BtnObject(pygame.Rect(100, 100, 100, 100), interrupt, color=RED))
+UIManager.add(inv_mgr, debug_info, crucible, BtnObject(pygame.Rect(700, 350, 100, 100), interrupt, color=MAGENTA, z_index=ZIndex.ui, text='中断测试'))
 
 # 我的变量定义结束
 

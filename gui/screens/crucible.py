@@ -36,13 +36,13 @@ class CrucibleObject(PgObject):
 
         self._btns = [self._dealch_btn, self._reaction_btn]
 
-    def on_create(self):
+    def _on_create(self):
         UIManager.add(*self._btns)
 
-    def on_remove(self):
+    def _on_remove(self):
         UIManager.remove(*self._btns)
 
-    def handle_event(self, event: pygame.event.Event):
+    def _handle_event(self, event: pygame.event.Event):
         # 如果鼠标左键抬起
         if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
             # 查询所有被拖拽出的物品
