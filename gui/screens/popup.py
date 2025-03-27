@@ -6,14 +6,26 @@ from gui.managers.ui import UIManager
 
 
 class ConfirmBox(PgObject):
-    rect = pygame.Rect(0, 0, 0, 0)
+    def __init__(self, pos: tuple[int, int], refer: list[bool], text: str = ''):
+        self.rect = pygame.Rect(pos[0], pos[1], 250, 125)
+        self.color = WHITE
+        self.refer = refer
 
     def _on_create(self):
+        nobtn = BtnObject(pygame.Rect(0, 0, 95, 40), self.end, args=[False],
+                  z_index=ZIndex.int_ui, color=RED, text='取消')
+        yesbtn = BtnObject(pygame.Rect(0, 0, 95, 40), self.end, args=[True],
+                  z_index=ZIndex.int_ui, color=BLUE, text='确定')
+        nobtn.rect.bottom = self.rect.bottom - 5
+        nobtn.rect.left = self.rect.left + 20
+        yesbtn.rect.bottom = self.rect.bottom - 5
+        yesbtn.rect.right = self.rect.right - 20
         UIManager.interrupt([
-            BtnObject(pygame.Rect(WINDOW_SIZE[0] / 2 - 74, WINDOW_SIZE[1] - 128, 64, 64), self.end, z_index=ZIndex.int_ui, color=RED, text='取消'),
-            BtnObject(pygame.Rect(WINDOW_SIZE[0] / 2 + 10, WINDOW_SIZE[1] - 128, 64, 64), self.end, z_index=ZIndex.int_ui, color=BLUE, text='确定')
-        ])
+            nobtn, yesbtn
+            ])
 
-    def end(self):
+    def end(self, result: bool):
+        self.refer[0] = True
+        self.refer[1] = result
         UIManager.pop_int()
         UIManager.remove(self)

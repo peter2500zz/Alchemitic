@@ -17,7 +17,7 @@ from gui.screens.popup import ConfirmBox
 
 def interrupt():
     print('interrupt')
-    UIManager.add(ConfirmBox())
+    UIManager.add(ConfirmBox((0, 0), [False, True]))
 
 # 初始化及使用示例
 logger.info(f'初始化 GUI')

@@ -6,6 +6,7 @@ from gui.base import PgObject, BtnObject
 from gui.screens.item import ItemObject
 from gui.config import *
 from gui.managers.ui import UIManager
+from gui.screens.popup import ConfirmBox
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -23,6 +24,8 @@ class CrucibleObject(PgObject):
         self.crucible = crucible
 
         self._init_btn()
+
+        self._confirm_dealch = [False, False]
 
     def _init_btn(self):
         """
@@ -57,11 +60,18 @@ class CrucibleObject(PgObject):
                     # 一次只操作一个物品
                     break
 
+    def _update(self) -> None:
+        if self._confirm_dealch[0]:
+            self._confirm_dealch[0] = False
+            if self._confirm_dealch[1]:
+                self.crucible.dealch()
+
     def _dealch(self):
         """
         调用自身坩埚的分解
         """
-        self.crucible.dealch()
+        if not self._confirm_dealch[0]:
+            UIManager.add(ConfirmBox((100, 100), self._confirm_dealch))
 
     def _reaction(self):
         """调用自身坩埚的反应"""
