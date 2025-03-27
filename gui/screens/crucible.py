@@ -25,18 +25,26 @@ class CrucibleObject(PgObject):
 
         self._init_btn()
 
-        self._confirm_dealch = [False, False]
-        self._confirm_reaction = [False, False]
-
     def _init_btn(self):
         """
         初始化自己的按钮
         """
 
         # 分解按钮
-        self._dealch_btn = BtnObject(pygame.Rect((330, 240, 64, 32)), self._dealch, color=RED, text='加热')
+        self._dealch_btn = BtnObject(
+            pygame.Rect((330, 240, 64, 32)),
+            UIManager.add,
+            args=[ConfirmBox(yes_func=self._dealch, text="分解锅里所有的物品？")],
+            color=RED,
+            text='加热'
+        )
         # 加热按钮
-        self._reaction_btn = BtnObject(pygame.Rect((394, 240, 64, 32)), self._reaction, color=BLUE, text='搅拌')
+        self._reaction_btn = BtnObject(
+            pygame.Rect((394, 240, 64, 32)), UIManager.add,
+            args=[ConfirmBox(yes_func=self._reaction, text="用锅里的东西制作新的东西？")],
+            color=BLUE,
+            text='搅拌'
+        )
 
         self._btns = [self._dealch_btn, self._reaction_btn]
 
@@ -61,29 +69,19 @@ class CrucibleObject(PgObject):
                     # 一次只操作一个物品
                     break
 
-    def _update(self) -> None:
-        if self._confirm_dealch[0]:
-            self._confirm_dealch[0] = False
-            if self._confirm_dealch[1]:
-                self.crucible.dealch()
-        if self._confirm_reaction[0]:
-            self._confirm_reaction[0] = False
-            if self._confirm_reaction[1]:
-                new_aspect_createc, item_created = self.crucible.reaction()
-                for i, item in enumerate(item_created):
-                    UIManager.add(ItemObject(pygame.Rect((330 + 50 * i, 34, 48, 48)), item, color=CYAN))
-
     def _dealch(self):
         """
         调用自身坩埚的分解
         """
-        if not self._confirm_dealch[0]:
-            UIManager.add(ConfirmBox((100, 100), self._confirm_dealch, "分解锅里所有的物品？"))
+        self.crucible.dealch()
 
     def _reaction(self):
         """调用自身坩埚的反应"""
-        if not self._confirm_reaction[0]:
-            UIManager.add(ConfirmBox((100, 100), self._confirm_reaction, "用锅里的东西制作新的东西？"))
+        new_aspect_created, item_created = self.crucible.reaction()
+        if new_aspect_created:
+            UIManager.add(ConfirmBox(text='产生了新的要素！', single=True))
+        for i, item in enumerate(item_created):
+            UIManager.add(ItemObject(pygame.Rect((330 + 50 * i, 34, 48, 48)), item, color=CYAN))
 
 
 

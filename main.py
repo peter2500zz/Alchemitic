@@ -13,11 +13,6 @@ logger = new_logger('GUI')
 
 
 # ==== 测试 ====
-from gui.screens.popup import ConfirmBox
-
-def interrupt():
-    print('interrupt')
-    UIManager.add(ConfirmBox((0, 0), [False, True]))
 
 # 初始化及使用示例
 logger.info(f'初始化 GUI')
@@ -54,7 +49,6 @@ ToolTipManager.init()
 AssetsLoader.init(standard_assets)
 
 UIManager.add(inv_mgr, debug_info, crucible)
-# , BtnObject(pygame.Rect(700, 350, 100, 100), interrupt, color=MAGENTA, z_index=ZIndex.ui, text='中断测试'))
 
 # 我的变量定义结束
 
