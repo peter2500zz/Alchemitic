@@ -53,7 +53,8 @@ UIManager.init(clock)
 ToolTipManager.init()
 AssetsLoader.init(standard_assets)
 
-UIManager.add(inv_mgr, debug_info, crucible, BtnObject(pygame.Rect(700, 350, 100, 100), interrupt, color=MAGENTA, z_index=ZIndex.ui, text='中断测试'))
+UIManager.add(inv_mgr, debug_info, crucible)
+# , BtnObject(pygame.Rect(700, 350, 100, 100), interrupt, color=MAGENTA, z_index=ZIndex.ui, text='中断测试'))
 
 # 我的变量定义结束
 

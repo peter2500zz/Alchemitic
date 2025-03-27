@@ -213,7 +213,7 @@ class BtnObject(PgObject):
 
 
 class TextObject(PgObject):
-    def __init__(self, text: str, font_size: int = 14, rect=pygame.Rect((0, 0, *WINDOW_SIZE)), reverse_v=False, reverse_h=False):
+    def __init__(self, text: str, rect: pygame.Rect, font_size: int = 14, reverse_v=False, reverse_h=False):
         self.rect = rect
 
         self.text = text
@@ -227,7 +227,7 @@ class TextObject(PgObject):
         split_text = self.text.split('\n')
         offset_y = 0
         for text in split_text:
-            text = self.font.render(text, True, WHITE)
+            text = self.font.render(text, True, self.color)
             text_rect = text.get_rect()
 
             if self.reverse_v:

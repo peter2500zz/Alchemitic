@@ -9,7 +9,8 @@ from gui.config import *
 class InfoDebug(TextObject, DebugMark):
     def __init__(self):
         self.text = ""
-        super().__init__(self.text, reverse_v=True)
+        self.color = WHITE
+        super().__init__(self.text, pygame.Rect(0, 0, *WINDOW_SIZE), reverse_v=True)
 
     def _on_create(self):
         self.rect.bottomleft = (0, WINDOW_SIZE[1])

@@ -26,6 +26,7 @@ class CrucibleObject(PgObject):
         self._init_btn()
 
         self._confirm_dealch = [False, False]
+        self._confirm_reaction = [False, False]
 
     def _init_btn(self):
         """
@@ -65,19 +66,24 @@ class CrucibleObject(PgObject):
             self._confirm_dealch[0] = False
             if self._confirm_dealch[1]:
                 self.crucible.dealch()
+        if self._confirm_reaction[0]:
+            self._confirm_reaction[0] = False
+            if self._confirm_reaction[1]:
+                new_aspect_createc, item_created = self.crucible.reaction()
+                for i, item in enumerate(item_created):
+                    UIManager.add(ItemObject(pygame.Rect((330 + 50 * i, 34, 48, 48)), item, color=CYAN))
 
     def _dealch(self):
         """
         调用自身坩埚的分解
         """
         if not self._confirm_dealch[0]:
-            UIManager.add(ConfirmBox((100, 100), self._confirm_dealch))
+            UIManager.add(ConfirmBox((100, 100), self._confirm_dealch, "分解锅里所有的物品？"))
 
     def _reaction(self):
         """调用自身坩埚的反应"""
-        new_aspect_createc, item_created = self.crucible.reaction()
-        for i, item in enumerate(item_created):
-            UIManager.add(ItemObject(pygame.Rect((330 + 50 * i, 34, 48, 48)), item, color=CYAN))
+        if not self._confirm_reaction[0]:
+            UIManager.add(ConfirmBox((100, 100), self._confirm_reaction, "用锅里的东西制作新的东西？"))
 
 
 
