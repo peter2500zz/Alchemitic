@@ -2,6 +2,7 @@ from core.main import *
 
 from gui.base import *
 from gui.config import *
+from gui.managers.smooth import SmoothMove
 from gui.managers.tooltip import ToolTipManager
 from gui.managers.ui import UIManager
 from gui.screens.item import InventoryObject
@@ -65,6 +66,7 @@ while running:
 
     # ==== 逻辑更新 ====
     ToolTipManager.update()
+    SmoothMove.update()
     UIManager.update()
 
     # ==== 绘制部分 ====

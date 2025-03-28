@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from gui.base import *
 from gui.config import *
+from gui.managers.smooth import SmoothMove
 from gui.managers.tooltip import ToolTipManager
 from gui.managers.ui import UIManager
 
@@ -52,10 +53,11 @@ class InventoryObject(PgObject):
 
     def _switch_open(self):
         if not self._open:
-            self.rect.left += self.rect.width
+            # self.rect.left += self.rect.width
+            SmoothMove.move(self, (self.rect.left + self.rect.width, self.rect.y), 0.5)
             self._open = True
         else:
-            self.rect.left -= self.rect.width
+            SmoothMove.move(self, (self.rect.left - self.rect.width, self.rect.y), 0.5)
             self._open = False
 
     def _on_create(self):
