@@ -102,10 +102,29 @@ class UIManager:
         return result
 
     @classmethod
-    def interrupt(cls, int_objs: list):
-        cls._int.append(int_objs)
+    def int_new(cls, *objs: PgObject):
+        cls._int.append([])
+        for obj in objs:
+            cls._int[-1].append(obj)
+            obj.on_create()
 
     @classmethod
-    def pop_int(cls):
+    def int_pop(cls):
+        for obj in cls._int[-1]:
+            obj.on_remove()
         cls._int.pop()
+
+    @classmethod
+    def int_add(cls, *objs: PgObject):
+        for obj in objs:
+            cls._int[-1].append(obj)
+            obj.on_create()
+
+    @classmethod
+    def int_remove(cls, *objs: PgObject):
+        for obj in objs:
+            obj.on_remove()
+            cls._int[-1].remove(obj)
+            del obj
+
 

@@ -48,9 +48,9 @@ class ConfirmBox(PgObject):
         text.color = BLACK
         text.z_index = ZIndex.int_ui
         # 创建中断
-        UIManager.interrupt(btn_list)
+        UIManager.int_add(*btn_list)
 
     def end(self, func: callable):
-        UIManager.pop_int()
-        UIManager.remove(self)
+        UIManager.int_remove(self)
+        UIManager.int_pop()
         func()
