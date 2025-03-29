@@ -90,7 +90,7 @@ class PgObject(object):
         游戏刷新画面时调用此方法
         """
         if self.img:
-            surface.blit(pygame.transform.scale(AssetsLoader.get(self.img), (self.rect.width, self.rect.height)), self.rect.topleft)
+            surface.blit(pygame.transform.scale(AssetsLoader.get_image(self.img), (self.rect.width, self.rect.height)), self.rect.topleft)
         else:
             pygame.draw.rect(surface, self.color, self.rect)
 
@@ -165,9 +165,10 @@ class BtnObject(PgObject):
     """
     按钮obj类
     """
-    def __init__(self, rect: pygame.Rect, func, args: list = None, kwargs: dict = None, *, color=BLACK, text=''):
+    def __init__(self, rect: pygame.Rect, func, args: list = None, kwargs: dict = None, *, color=BLACK, text='', z_index=ZIndex.ui):
         self.rect = rect
         self.color = color
+        self.z_index = z_index
 
         self.pressed = False
         self.func = func
@@ -212,7 +213,7 @@ class BtnObject(PgObject):
 
 
 class TextObject(PgObject):
-    def __init__(self, text: str, font_size: int = 14, rect=pygame.Rect((0, 0, *WINDOW_SIZE)), reverse_v=False, reverse_h=False):
+    def __init__(self, text: str, rect: pygame.Rect, font_size: int = 14, reverse_v=False, reverse_h=False):
         self.rect = rect
 
         self.text = text
@@ -226,7 +227,7 @@ class TextObject(PgObject):
         split_text = self.text.split('\n')
         offset_y = 0
         for text in split_text:
-            text = self.font.render(text, True, WHITE)
+            text = self.font.render(text, True, self.color)
             text_rect = text.get_rect()
 
             if self.reverse_v:

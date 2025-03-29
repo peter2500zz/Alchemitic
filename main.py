@@ -1,21 +1,19 @@
-import pygame
-
 from core.main import *
 
 from gui.base import *
 from gui.config import *
+from gui.managers.smooth import SmoothMove
 from gui.managers.tooltip import ToolTipManager
 from gui.managers.ui import UIManager
 from gui.screens.item import InventoryObject
 from gui.screens.crucible import CrucibleObject
 from gui.screens.debug import GUIDebug
-from gui.assets import AssetsLoader, standard_assets
+from gui.assets import AssetsLoader
 
 logger = new_logger('GUI')
 
 
-# ==== 测试用的类 ====
-
+# ==== 测试 ====
 
 # 初始化及使用示例
 logger.info(f'初始化 GUI')
@@ -46,9 +44,11 @@ inv = Inventory(
 inv_mgr = InventoryObject(pygame.Rect((0, 64, 232, 306)), inv)
 crucible = CrucibleObject(Crucible(standard_alchemy_recipes))
 debug_info = GUIDebug()
-UIManager(clock)
+
+UIManager.init(clock)
 ToolTipManager.init()
-AssetsLoader.load(standard_assets)
+AssetsLoader.init(standard_assets)
+
 UIManager.add(inv_mgr, debug_info, crucible)
 
 # 我的变量定义结束
@@ -66,6 +66,7 @@ while running:
 
     # ==== 逻辑更新 ====
     ToolTipManager.update()
+    SmoothMove.update()
     UIManager.update()
 
     # ==== 绘制部分 ====

@@ -9,22 +9,24 @@ from gui.config import *
 class InfoDebug(TextObject, DebugMark):
     def __init__(self):
         self.text = ""
-        super().__init__(self.text, reverse_v=True)
+        self.color = WHITE
+        super().__init__(self.text, pygame.Rect(0, 0, *WINDOW_SIZE), reverse_v=True)
 
     def _on_create(self):
         self.rect.bottomleft = (0, WINDOW_SIZE[1])
 
     def _update(self) -> None:
-        this_frame = UIManager._frames[UIManager._current_frame]
+        this_frame = UIManager.query(PgObject)
 
         text = [
-            f'objects: {len([i for i in this_frame if not isinstance(i, DebugMark)])} -> {", ".join([i.__class__.__name__ for i in this_frame if i.rect.collidepoint(pygame.mouse.get_pos()) and not isinstance(i, DebugMark)])}',
+            f'objects: {len([i for i in this_frame if not isinstance(i, DebugMark)])} -> {", ".join([f"{i.__class__.__name__ }({i.z_index.value})" for i in this_frame if i.rect.collidepoint(pygame.mouse.get_pos()) and not isinstance(i, DebugMark)])}',
             f'inv: {[{res.name: res.num for res in inv.inv.export()} for inv in UIManager.query(InventoryObject)]}',
             f'cru: {[{res.name: res.num for res in cru.crucible.inventory.export()} for cru in UIManager.query(CrucibleObject)]}',
             f'mouse_pos: {pygame.mouse.get_pos()}',
             f'fps: {UIManager.clock.get_fps():.2f}',
-            # f'pages: {[inv._current_page for inv in UIManager.query(InventoryObject)]}',
         ]
+        if UIManager._int:
+            text.append(f'INTERRUPTED!!! ({len(UIManager._int)})')
         self.text = '\n'.join(text)
 
     def _draw(self, surface: pygame.Surface) -> None:
@@ -36,29 +38,20 @@ class InfoDebug(TextObject, DebugMark):
                 if o.rect.collidepoint(pygame.mouse.get_pos()):
                     pygame.draw.rect(surface, GREEN, o.rect, 1)
 
-class ObjectDebug(TextObject, DebugMark):
-    def __init__(self):
-        self.text = ""
-        super().__init__(self.text, reverse_h=True, reverse_v=True)
-
-    def _on_create(self):
-        self.rect.bottomright = WINDOW_SIZE
-
-    def _update(self) -> None:
-        text = [f'{x}, z-index: {x.z_index.value}' for x in UIManager._frames[UIManager._current_frame]]
-        self.text = '\n'.join(text)
-
 
 class GUIDebug(PgObject, DebugMark):
+    """管理所有Debug组建的类"""
     def __init__(self):
         super().__init__()
-        self.debug = [InfoDebug()]#, ObjectDebug()]
+        self.debug = [InfoDebug()]
 
+        self.z_index = ZIndex.debug
+        self.rect = pygame.Rect(0, 0, 0, 0)
         self._is_debugging = False
 
     def _on_create(self):
         for debug in self.debug:
-            debug.z_index = ZIndex.debug
+            debug.z_index = self.z_index
             UIManager.add(debug)
 
     def _on_remove(self):

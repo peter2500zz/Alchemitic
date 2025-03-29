@@ -1,12 +1,10 @@
 from __future__ import annotations
 
-import pygame
-
 from gui.base import *
 from gui.config import *
+from gui.managers.smooth import SmoothMove
 from gui.managers.tooltip import ToolTipManager
 from gui.managers.ui import UIManager
-from gui.assets import AssetsLoader
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -55,18 +53,19 @@ class InventoryObject(PgObject):
 
     def _switch_open(self):
         if not self._open:
-            self.rect.left += self.rect.width
+            # self.rect.left += self.rect.width
+            SmoothMove.move(self, (0, self.rect.y), 0.382)
             self._open = True
         else:
-            self.rect.left -= self.rect.width
+            SmoothMove.move(self, (-self.rect.width, self.rect.y), 0.382)
             self._open = False
 
-    def on_create(self):
+    def _on_create(self):
         #  当自身被创建的时候将所有物品槽位加入管理器，初始化
         UIManager.add(*self.item_slots.values())
         UIManager.add(*self._btns)
 
-    def on_remove(self):
+    def _on_remove(self):
         UIManager.remove(*self.item_slots.values())
         UIManager.remove(*self._btns)
 
@@ -171,10 +170,10 @@ class ItemObject(DraggableObject):
         self.img = self.item.img
         self.z_index = ZIndex.dragging_item
 
-    def on_create(self):
+    def _on_create(self):
         ToolTipManager.register(self, self.item.name, self.item.description)
 
-    def on_remove(self):
+    def _on_remove(self):
         ToolTipManager.unregister(self)
     
     def _on_drag_start(self) -> bool:
@@ -215,10 +214,10 @@ class ItemSlotObject(DraggableObject):
         self._takeable = True
         self._take_out_num = 1  # 除非调试不然不要改这个！！！
 
-    def on_create(self):
+    def _on_create(self):
         ToolTipManager.register(self, self.item.name, self.item.description)
 
-    def on_remove(self):
+    def _on_remove(self):
         ToolTipManager.unregister(self)
 
     def _on_drag_start(self) -> bool:
@@ -242,7 +241,6 @@ class ItemSlotObject(DraggableObject):
         return False
 
     def _on_drag_end(self) -> None:
-        # todo! 话又说回来了，我觉得应该加一个滚轮来应对物品很多的情况，其他例如文本在超出self.rect时候也可以用这个滚轮，mixin？遮罩？
         if self.holding:
             if self.item.num - self._take_out_num >= 0:
                 self.item.num -= self._take_out_num

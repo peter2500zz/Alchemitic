@@ -20,16 +20,16 @@ for item in standard_items:  # 遍历所有注册的物品
                 # 物品可以在配方中被找到
                 recipe_requires.append(recipe.requires)
     if not recipe_requires:
-        logger.warning(f'{item} 没有有效的合成配方')
+        logger.warning(f'{item.name} 没有有效的合成配方')
 
     # 递归检测物品要素合集
     def cycle_def(_item, _num=1):
         if _num > 99:  # 防止出现循环配方时有过深的递归
             raise RecursionError('检测到未定义要素的循环合成，无法自动设定')
         if not recipe_requires:  # 没有有效的配方可以提供要素参考
-            logger.error(f'{_item} 没有任何有效的配方可以为其设定要素')
+            logger.error(f'{_item.name} 没有任何有效的配方可以为其设定要素')
         elif len(recipe_requires) > 1:  # 有多个可能的配方，无法判定
-            logger.error(f'{_item} 在没有设定要素的情况下有多个不同的配方')
+            logger.error(f'{_item.name} 在没有设定要素的情况下有多个不同的配方')
         else:
             _recipe = recipe_requires[0]  # 单个配方
             aspects = Inventory()  # 创建临时的物品用于储存，使用背包类是因为可以直接合并同类项
@@ -43,12 +43,12 @@ for item in standard_items:  # 遍历所有注册的物品
                     aspects.add(_resource)
             _item.aspects = aspects.export()  # 导出储存的要素
             del aspects  # 清理内存
-            logger.info(f'{_item} 的要素被自动设定为 {", ".join([f"{aspect.num}*{aspect.name}" for aspect in _item.aspects])}')
+            logger.info(f'{_item.name} 的要素被自动设定为 {", ".join([f"{aspect.num}*{aspect.name}" for aspect in _item.aspects])}')
     try:
         item.aspects
     except AttributeError:  # 如果物品没有设定要素
         try:
-            logger.warning(f'{item} 没有设定所包含的要素，正在尝试根据配方自动设定')
+            logger.warning(f'{item.name} 没有设定所包含的要素，正在尝试根据配方自动设定')
             cycle_def(item)
         except RecursionError as e:  # 递归过深
             logger.error(e)
