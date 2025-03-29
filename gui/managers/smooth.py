@@ -70,11 +70,20 @@ class SmoothMove:
 
     @classmethod
     def move(cls, obj: PgObject, target_pos: tuple[int, int], time: float):
+        origin_pos = obj.rect.topleft
+
+        if obj_data := cls.moving_objs.get(obj):
+            s_all = (abs(obj_data['origin_pos'][i] - pos) for i, pos in enumerate(obj_data['target_pos']))
+            s_done = (abs(obj_data['origin_pos'][i] - pos) for i, pos in enumerate(obj.rect.topleft))
+            percent = (sum(s_done) / 2) / (sum(s_all) / 2)
+            time *= percent
+
         cls.moving_objs[obj] = {
             'v': (
                 (target_pos[0] - obj.rect.x) / time,
                 (target_pos[1] - obj.rect.y) / time
             ),
+            'origin_pos': origin_pos,
             'target_pos': target_pos,
             'remainder': (0.0, 0.0)
         }
