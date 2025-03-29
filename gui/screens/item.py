@@ -54,10 +54,10 @@ class InventoryObject(PgObject):
     def _switch_open(self):
         if not self._open:
             # self.rect.left += self.rect.width
-            SmoothMove.move(self, (self.rect.left + self.rect.width, self.rect.y), 0.5)
+            SmoothMove.move(self, (self.rect.left + self.rect.width, self.rect.y), 0.25)
             self._open = True
         else:
-            SmoothMove.move(self, (self.rect.left - self.rect.width, self.rect.y), 0.5)
+            SmoothMove.move(self, (self.rect.left - self.rect.width, self.rect.y), 0.25)
             self._open = False
 
     def _on_create(self):
